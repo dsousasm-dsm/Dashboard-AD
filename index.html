@@ -18,18 +18,52 @@
             --primary: #0F4C75; --primary-light: #3282B8; --accent: #BBE1FA; --dark: #1B262C;
             --text-main: #333333; --text-light: #666666; --bg-body: #F0F2F5; --surface: #FFFFFF;
             --success: #28A745; --warning: #FFC107; --danger: #DC3545; --info: #17A2B8;
-            --radius: 12px; --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --transition: all 0.3s ease;
+            --radius: 8px; --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --transition: all 0.3s ease;
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; font-size: 14px; }
         
-        /* HEADER */
-        header { background: var(--surface); padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); border-bottom: 1px solid #e1e4e8; position: sticky; top: 0; z-index: 1000; }
-        .brand-area { display: flex; align-items: center; gap: 15px; }
+        /* HEADER (AGORA COM FILTROS) */
+        header { 
+            background: var(--surface); 
+            padding: 0.8rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: var(--shadow-sm); 
+            border-bottom: 1px solid #e1e4e8; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .brand-area { display: flex; align-items: center; gap: 15px; min-width: 250px; }
         .company-logo-text { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-transform: uppercase; border-left: 4px solid var(--primary-light); padding-left: 15px; }
-        .dashboard-title { font-size: 0.9rem; color: var(--text-light); font-weight: 500; }
-        .header-actions button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 8px; }
-        .header-actions button:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .dashboard-title { font-size: 0.9rem; color: var(--text-light); font-weight: 500; border-left: 1px solid #ddd; padding-left: 15px; }
+        
+        /* HEADER CONTROLS (FILTROS + BOTÕES) */
+        .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+        
+        .header-filter-group { display: flex; flex-direction: column; min-width: 140px; }
+        .header-filter-group label { font-size: 0.65rem; font-weight: 700; color: var(--text-light); margin-bottom: 2px; text-transform: uppercase; }
+        .header-select {
+            padding: 6px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            font-size: 0.85rem;
+            color: var(--dark);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .header-select:focus { border-color: var(--primary); outline: none; background-color: white; }
+        
+        .header-btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .header-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .header-btn-secondary { background: white; color: var(--text-light); border: 1px solid #dee2e6; }
+        .header-btn-secondary:hover { background: #f1f1f1; color: var(--dark); }
 
         /* TABS */
         .nav-tabs { background: var(--dark); padding: 0 2rem; display: flex; gap: 1rem; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -56,10 +90,11 @@
         .kpi-lbl { font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; }
         .kpi-val { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
 
+        /* Local Filters (Inside Tabs) */
         .filter-bar { background: #f8f9fa; padding: 1.5rem; border-radius: var(--radius); border: 1px solid #e0e0e0; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 25px; }
         .filter-group { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
         .filter-group label { font-size: 0.75rem; font-weight: 700; margin-bottom: 6px; color: var(--text-light); text-transform: uppercase; }
-        select, input { padding: 10px 15px; border: 1px solid #ccc; border-radius: 6px; background-color: white; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+        select:not(.header-select), input { padding: 10px 15px; border: 1px solid #ccc; border-radius: 6px; background-color: white; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
         select:focus, input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.1); }
         
         .btn-reset { background: white; border: 1px solid #ccc; color: var(--text-main); padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; height: 42px; display: flex; align-items: center; gap: 5px; }
@@ -96,10 +131,10 @@
         .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; display: inline-block; }
         .bg-red { background: #fee2e2; color: #b91c1c; }
         .bg-green { background: #d1fae5; color: #047857; }
+        .status-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 2px; }
         
         .radar-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px; }
         .radar-container { height: 350px; width: 350px; position: relative; margin: 0 auto; }
-        
         .detail-flex { display: flex; gap: 25px; flex-wrap: wrap; align-items: flex-start; }
         .detail-table { flex: 1; min-width: 350px; border: 1px solid #eee; border-radius: 12px; padding: 15px; background: white; box-shadow: var(--shadow-sm); }
         .detail-charts { flex: 1; min-width: 350px; display: flex; gap: 15px; }
@@ -111,9 +146,25 @@
         .heat-yellow { background: var(--warning); color: #333; }
         .heat-green { background: var(--success); }
         .col-fixed { position: sticky; left: 0; background: #fff; z-index: 10; border-right: 2px solid #eee; min-width: 120px; max-width: 150px; }
+        
+        .data-table-container { margin-top: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        .draft-alert { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffeeba; }
+        .draft-alert h4 { margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; }
+        .draft-list { margin-top: 10px; display: none; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 6px; }
 
-        @media(max-width: 1000px){ .chart-row { grid-template-columns: 1fr; } .info-grid { grid-template-columns: 1fr 1fr; } .detail-charts { flex-direction: column; } }
+        @media(max-width: 1000px){ .chart-row { grid-template-columns: 1fr; } .info-grid { grid-template-columns: 1fr 1fr; } .detail-charts { flex-direction: column; } .header-controls { justify-content: flex-start; margin-top: 10px; } }
         .hidden { display: none !important; }
+
+        @media print {
+            body { background: white; -webkit-print-color-adjust: exact; }
+            .no-print, .nav-tabs, .filter-bar, .pagination-container, .btn-action, .btn-icon, .btn-reset, .upload-overlay, .header-controls { display: none !important; }
+            .container { padding: 0; max-width: 100%; width: 100%; }
+            .card { border: none; box-shadow: none; padding: 0; margin-bottom: 20px; break-inside: avoid; }
+            .data-table-container, .detail-table, table { max-height: none !important; height: auto !important; overflow: visible !important; display: table !important; width: 100% !important; }
+            .chart-container, .radar-container { height: 350px !important; width: 100% !important; page-break-inside: avoid; }
+            .tab-content { display: block !important; }
+            .tab-content:not(.active) { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -137,12 +188,27 @@
             <div id="headerLogo" class="company-logo-text">EMPRESA</div>
             <div class="dashboard-title">| Dashboard Estratégico</div>
         </div>
-        <div class="header-actions">
-            <button onclick="window.print()"><i class="fas fa-print"></i> Exportar PDF</button>
+        
+        <div class="header-controls no-print">
+            <div class="header-filter-group">
+                <label>Superintendência</label>
+                <select id="globalSuper" class="header-select" onchange="applyGlobalFilters('super')"><option value="all">Todas</option></select>
+            </div>
+            <div class="header-filter-group">
+                <label>Gestor</label>
+                <select id="globalGestor" class="header-select" onchange="applyGlobalFilters('gestor')"><option value="all">Todos</option></select>
+            </div>
+            <div class="header-filter-group">
+                <label>Departamento</label>
+                <select id="globalDept" class="header-select" onchange="applyGlobalFilters('dept')"><option value="all">Todos</option></select>
+            </div>
+            <button class="header-btn header-btn-secondary" onclick="clearGlobalFilters()" title="Limpar Filtros"><i class="fas fa-eraser"></i></button>
+            <div style="border-left: 1px solid #ddd; height: 30px; margin: 0 10px;"></div>
+            <button class="header-btn" onclick="window.print()"><i class="fas fa-print"></i> Exportar</button>
         </div>
     </header>
 
-    <nav class="nav-tabs">
+    <nav class="nav-tabs no-print">
         <button class="nav-btn active" onclick="switchTab('geral')"><i class="fas fa-home"></i> Visão Geral</button>
         <button class="nav-btn" onclick="switchTab('participantes')"><i class="fas fa-users"></i> Participantes & PDI</button>
         <button class="nav-btn" onclick="switchTab('performance')"><i class="fas fa-chart-bar"></i> Indicadores & Performance</button>
@@ -153,16 +219,7 @@
     <div class="container">
         
         <div id="tab-geral" class="tab-content active">
-            
-            <div class="card">
-                <div class="card-header"><h3><i class="fas fa-filter"></i> Filtros Globais (Impactam Indicadores Acima)</h3></div>
-                <div class="filter-bar" style="margin:0; border:none; background:transparent; padding:0;">
-                    <div class="filter-group"><label>Superintendência</label><select id="gSuper" onchange="updateCascadingFilters('g', 'super')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Gestor</label><select id="gGestor" onchange="updateCascadingFilters('g', 'gestor')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Departamento</label><select id="gDept" onchange="updateCascadingFilters('g', 'dept')"><option value="all">Todas</option></select></div>
-                    <button class="btn-reset" onclick="clearGlobalFilters()"><i class="fas fa-eraser"></i> Limpar</button>
-                </div>
-            </div>
+            <div id="draftAlertContainer"></div>
 
             <div class="info-grid">
                 <div class="info-box"><h4 id="cntCargos">0</h4><span>💼 Cargos Únicos</span></div>
@@ -172,7 +229,7 @@
             </div>
 
             <div class="kpi-grid">
-                <div class="kpi-card"><div class="kpi-lbl">Total Participantes</div><div class="kpi-val" id="kpiTotal">0 🧑‍🤝‍🧑</div></div>
+                <div class="kpi-card"><div class="kpi-lbl">Total Participantes (Concluídos)</div><div class="kpi-val" id="kpiTotal">0 🧑‍🤝‍🧑</div></div>
                 <div class="kpi-card"><div class="kpi-lbl">Média Geral</div><div class="kpi-val" id="kpiMedia">0.0 📊</div></div>
                 <div class="kpi-card" style="border-left-color: var(--danger);"><div class="kpi-lbl">Com GAP (<3.0)</div><div class="kpi-val" id="kpiGaps">0 ⚠️</div></div>
                 <div class="kpi-card" style="border-left-color: var(--success);"><div class="kpi-lbl">Melhor Competência</div><div class="kpi-val" id="kpiBestComp">- 🏆</div></div>
@@ -181,26 +238,26 @@
 
             <div class="chart-row-vertical" style="margin-top:20px;">
                 <div class="card">
-                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média Global por Superintendência</h3></div>
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média por Superintendência (ou Detalhe)</h3></div>
                     <div id="containerSuper" class="chart-container"><canvas id="chartSuper"></canvas></div>
+                    <div class="data-table-container"><table id="tableSuper"><thead><tr><th>Nome</th><th>Média</th></tr></thead><tbody></tbody></table></div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média Global por Departamento</h3></div>
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média por Departamento</h3></div>
                     <div id="containerDept" class="chart-container"><canvas id="chartDept"></canvas></div>
+                    <div class="data-table-container"><table id="tableDept"><thead><tr><th>Nome</th><th>Média</th></tr></thead><tbody></tbody></table></div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média Global por Cargo</h3></div>
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média por Cargo</h3></div>
                     <div id="containerCargo" class="chart-container"><canvas id="chartCargo"></canvas></div>
+                    <div class="data-table-container"><table id="tableCargo"><thead><tr><th>Nome</th><th>Média</th></tr></thead><tbody></tbody></table></div>
                 </div>
             </div>
 
             <div class="card" style="margin-top: 20px;">
                 <div class="card-header"><h3><i class="fas fa-exclamation-triangle"></i> Gargalos e Oportunidades (Insights)</h3></div>
-                <div class="filter-bar" style="margin-bottom: 10px; border:none; padding:0; background:transparent;">
-                    <div class="filter-group"><label>Super.:</label><select id="gargaloSuper" onchange="updateGargaloFilters('super')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Gestor:</label><select id="gargaloGestor" onchange="updateGargaloFilters('gestor')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Depto:</label><select id="gargaloDept" onchange="updateGargaloFilters('dept')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Cargo:</label><select id="gargaloCargo" onchange="updateGargaloFilters('cargo')"><option value="all">Todas</option></select></div>
+                <div class="filter-bar no-print" style="margin-bottom: 10px; border:none; padding:0; background:transparent;">
+                    <div class="filter-group"><label>Filtrar por Papel (Gestor/Colaborador):</label><select id="gargaloPapel" onchange="updateGargaloFilters()"><option value="all">Todos</option></select></div>
                 </div>
                 <div id="gargaloInsight" class="insight-box" style="display:none;"></div>
                 <div id="containerGargalo" class="chart-container"><canvas id="chartGargalos"></canvas></div>
@@ -210,33 +267,29 @@
         <div id="tab-participantes" class="tab-content">
             <div class="card">
                 <div class="card-header"><h3><i class="fas fa-user-edit"></i> Gestão de Participantes & PDI</h3></div>
-                <div class="filter-bar">
-                    <div class="filter-group"><label>Superintendência</label><select id="fSuper" onchange="updateCascadingFilters('f', 'super')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Gestor</label><select id="fGestor" onchange="updateCascadingFilters('f', 'gestor')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Departamento</label><select id="fDept" onchange="updateCascadingFilters('f', 'dept')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Cargo</label><select id="fCargo" onchange="updateCascadingFilters('f', 'cargo')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Status Nota</label><select id="fNota" onchange="applyPartFilters()"><option value="all">Todas</option><option value="3">Crítico (< 3.0)</option><option value="4">Atenção (< 4.0)</option></select></div>
+                <div class="filter-bar no-print">
+                    <div class="filter-group"><label>Cargo</label><select id="fCargo" onchange="applyPartFilters()"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Status Nota</label><select id="fNota" onchange="applyPartFilters()">
+                        <option value="all">Todas</option>
+                        <option value="range1">Muito Abaixo (1.0 - 1.99)</option>
+                        <option value="range2">Abaixo (2.0 - 2.99)</option>
+                        <option value="range3">Atende (3.0 - 3.99)</option>
+                        <option value="range4">Acima (4.0+)</option>
+                    </select></div>
                     <div class="filter-group"><label>Busca Rápida</label><input type="text" id="fSearch" placeholder="Nome ou Matrícula..." onkeyup="applyPartFilters()"></div>
-                    <button class="btn-reset" onclick="clearPartFilters()"><i class="fas fa-sync-alt"></i> Resetar</button>
                     <div style="margin-left: auto; align-self: center; font-weight:bold; color:var(--primary);"><span id="resultCount">0</span> encontrados</div>
                 </div>
                 <div style="overflow-x:auto;">
                     <table id="tablePart">
-                        <thead><tr><th width="50">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Média Final</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th>Ação</th></tr></thead>
+                        <thead><tr><th width="50" class="no-print">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Média Final</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th class="no-print">Ação</th></tr></thead>
                         <tbody id="tbodyPart"></tbody>
                     </table>
                 </div>
-                <div class="pagination-container"><button class="btn-page" onclick="changePage(-1)">Anterior</button><span id="pageIndicator" class="page-info">1</span><button class="btn-page" onclick="changePage(1)">Próximo</button></div>
+                <div class="pagination-container no-print"><button class="btn-page" onclick="changePage(-1)">Anterior</button><span id="pageIndicator" class="page-info">1</span><button class="btn-page" onclick="changePage(1)">Próximo</button></div>
             </div>
         </div>
 
         <div id="tab-performance" class="tab-content">
-            <div class="filter-bar" style="margin-bottom:20px;">
-                <div class="filter-group"><label>Superintendência</label><select id="pSuper" onchange="updateCascadingFilters('p', 'super')"><option value="all">Todas</option></select></div>
-                <div class="filter-group"><label>Gestor</label><select id="pGestor" onchange="updateCascadingFilters('p', 'gestor')"><option value="all">Todas</option></select></div>
-                <div class="filter-group"><label>Departamento</label><select id="pDept" onchange="updateCascadingFilters('p', 'dept')"><option value="all">Todas</option></select></div>
-            </div>
-            
             <div class="card">
                 <div class="card-header" style="justify-content:center;"><h3><i class="fas fa-layer-group"></i> Distribuição de Conceitos (1-4) por Superintendência</h3></div>
                 <div style="display:flex; justify-content:center; padding: 20px;">
@@ -256,7 +309,7 @@
                 </div>
                 <div class="card">
                      <div class="card-header"><h3><i class="fas fa-table"></i> Ranking por Competência</h3></div>
-                     <div style="max-height: 350px; overflow-y: auto;">
+                     <div style="max-height: 350px; overflow-y: auto;" class="data-table-container">
                          <table class="rank-table" id="tableCompRank">
                              <thead><tr><th>Competência</th><th style="text-align:center;">Média Geral</th><th style="text-align:center;">Status</th></tr></thead>
                              <tbody></tbody>
@@ -268,16 +321,13 @@
 
         <div id="tab-gestao" class="tab-content">
             <div class="card">
-                <div class="filter-bar" style="border:none; box-shadow:none; padding:0; background:transparent;">
-                     <div class="filter-group"><label>Superintendência:</label><select id="gManSuper" onchange="updateCascadingFilters('gMan', 'super')"><option value="all">Todas</option></select></div>
-                     <div class="filter-group"><label>Departamento:</label><select id="gManDept" onchange="updateCascadingFilters('gMan', 'dept')"><option value="all">Todas</option></select></div>
-                     <div class="filter-group"><label>Selecione o Gestor:</label><select id="gestaoSelect" onchange="renderManagerProfile()"><option value="all">Visão Agregada</option></select></div>
-                     <button class="btn-reset" onclick="clearGestaoFilters()"><i class="fas fa-eraser"></i> Limpar</button>
+                <div class="filter-bar no-print" style="border:none; box-shadow:none; padding:0; background:transparent;">
+                     <div class="filter-group"><label>Selecione o Gestor (Para detalhe):</label><select id="gestaoSelect" onchange="renderManagerProfile()"><option value="all">Visão Agregada</option></select></div>
                 </div>
                 <div id="gestorProfile" class="gestor-profile">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom:10px; margin-bottom:20px;">
                         <h2 style="color: var(--primary); margin:0; display:flex; align-items:center; gap:10px;"><i class="fas fa-user-tie"></i> Análise: <span id="gestorName"></span></h2>
-                        <button onclick="downloadManagerPDF()" class="btn-action"><i class="fas fa-file-pdf"></i> Baixar Dossiê</button>
+                        <button onclick="downloadManagerPDF()" class="btn-action no-print"><i class="fas fa-file-pdf"></i> Baixar Dossiê</button>
                     </div>
                     <div class="gestor-grid">
                         <div>
@@ -305,16 +355,12 @@
         <div id="tab-heatmap" class="tab-content">
             <div class="card">
                 <div class="card-header"><h3><i class="fas fa-th"></i> Mapa de Calor</h3></div>
-                <div class="filter-bar">
-                    <div class="filter-group"><label>Superintendência</label><select id="hSuper" onchange="updateCascadingFilters('h', 'super')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Gestor</label><select id="hGestor" onchange="updateCascadingFilters('h', 'gestor')"><option value="all">Todas</option></select></div>
-                    <div class="filter-group"><label>Departamento</label><select id="hDept" onchange="updateCascadingFilters('h', 'dept')"><option value="all">Todas</option></select></div>
+                <div class="filter-bar no-print">
                     <div class="filter-group"><label>Busca</label><input type="text" id="hSearch" placeholder="Nome..." onkeyup="applyHeatmapFilters()"></div>
-                    <button class="btn-reset" onclick="clearHeatFilters()"><i class="fas fa-sync-alt"></i> Limpar</button>
                     <div style="margin-left: auto; color:var(--text-light);">Exibindo <strong id="heatCount">0</strong> registros</div>
                 </div>
                 <div style="overflow-x:auto;"><table id="tableHeat"><thead id="headHeat"></thead><tbody id="tbodyHeat"></tbody></table></div>
-                <div class="pagination-container"><button class="btn-page" onclick="changeHeatPage(-1)">Anterior</button><span id="pageIndicatorHeat" class="page-info">1</span><button class="btn-page" onclick="changeHeatPage(1)">Próximo</button></div>
+                <div class="pagination-container no-print"><button class="btn-page" onclick="changeHeatPage(-1)">Anterior</button><span id="pageIndicatorHeat" class="page-info">1</span><button class="btn-page" onclick="changeHeatPage(1)">Próximo</button></div>
             </div>
         </div>
     </div>
@@ -323,59 +369,26 @@
 <script>
     // DATA DICTIONARY
     const criteriaDetails = {
-       "CONFIANÇA - VALOR": {
-           desc: "Conhecer para Confiar.",
-           behaviors: "Sinceridade com respeito, coerência (fala/faz), empatia, escuta ativa, clareza, busca por fatos, transparência e cumprimento de combinados."
-       },
-       "DESENVOLVIMENTO DE PESSOAS - VALOR": {
-           desc: "Desenvolver para Transformar.",
-           behaviors: "Promoção de autonomia, desafios, feedback constante, coerência no recrutamento e fomento ao trabalho em equipe e aprendizado mútuo."
-       },
-       "INOVAÇÃO - VALOR": {
-           desc: "Experimentar, Criar e Evoluir.",
-           behaviors: "Resiliência, ousadia, otimismo, curiosidade por tendências, simplicidade, flexibilidade e cocriação."
-       },
-       "SATISFAÇÃO DO CLIENTE - VALOR": {
-           desc: "Conhecer para Servir, Conquistar e Fidelizar.",
-           behaviors: "Experiência positiva, antecipação de necessidades, atenção aos detalhes, resolução de conflitos e atendimento empático."
-       },
-       "SENSO DE DONO - VALOR": {
-           desc: "Vestir a camisa.",
-           behaviors: "Responsabilidade financeira, visão sistêmica, decisão de valor, promoção de engajamento e exemplo pessoal."
-       },
-       "EXCELÊNCIA - VALOR": {
-           desc: "Melhorar Sempre.",
-           behaviors: "Comprometimento além do esperado, alinhamento com cliente, critérios de qualidade, priorização, capricho e eficiência no uso de recursos."
-       },
-       "CONFIAR MUTUAMENTE - COMPORTAMENTO": {
-           desc: "Exposição de opinião sem filtros e vulnerabilidade.",
-           behaviors: "Compartilhar vulnerabilidades, promover troca de ideias, pedir ajuda, transparência e coerência."
-       },
-       "ENGAJAR-SE DE MANEIRA FRANCA E ABERTA - COMPORTAMENTO": {
-           desc: "Debate aberto e desafio construtivo.",
-           behaviors: "Coragem para assuntos sensíveis, comunicação aberta para inovação e criação de ambiente seguro."
-       },
-       "COMPROMETER-SE COM AS DECISÕES TOMADAS - COMPORTAMENTO": {
-           desc: "Compromisso genuíno e alinhamento.",
-           behaviors: "Estratégias de comprometimento, revisão conjunta de decisões e correlação com objetivos da equipe."
-       },
-       "ASSUMIR RESPONSABILIDADES PELAS DECISÕES TOMADAS - COMPORTAMENTO": {
-           desc: "Disseminação e cobrança de compromisso.",
-           behaviors: "Assumir responsabilidade por resultados, definição de papéis e revisões regulares de progresso."
-       },
-       "TER ATENÇÃO AOS RESULTADOS - COMPORTAMENTO": {
-           desc: "Foco no resultado coletivo.",
-           behaviors: "Priorização do coletivo, definição de indicadores de sucesso e conexão emocional com o sucesso/fracasso da organização."
-       }
+       "CONFIANÇA - VALOR": { desc: "Conhecer para Confiar.", behaviors: "Sinceridade, respeito, cumprimento de combinados." },
+       "DESENVOLVIMENTO DE PESSOAS - VALOR": { desc: "Desenvolver para Transformar.", behaviors: "Promoção de autonomia, feedback constante." },
+       "INOVAÇÃO - VALOR": { desc: "Experimentar, Criar e Evoluir.", behaviors: "Resiliência, ousadia, curiosidade." },
+       "SATISFAÇÃO DO CLIENTE - VALOR": { desc: "Conhecer para Servir.", behaviors: "Experiência positiva, antecipação de necessidades." },
+       "SENSO DE DONO - VALOR": { desc: "Vestir a camisa.", behaviors: "Responsabilidade, visão sistêmica." },
+       "EXCELÊNCIA - VALOR": { desc: "Melhorar Sempre.", behaviors: "Comprometimento, qualidade, eficiência." },
+       "CONFIAR MUTUAMENTE - COMPORTAMENTO": { desc: "Vulnerabilidade e confiança.", behaviors: "Compartilhar erros, pedir ajuda." },
+       "ENGAJAR-SE DE MANEIRA FRANCA E ABERTA - COMPORTAMENTO": { desc: "Debate aberto.", behaviors: "Coragem para assuntos sensíveis." },
+       "COMPROMETER-SE COM AS DECISÕES TOMADAS - COMPORTAMENTO": { desc: "Compromisso genuíno.", behaviors: "Estratégias de comprometimento e alinhamento." },
+       "ASSUMIR RESPONSABILIDADES PELAS DECISÕES TOMADAS - COMPORTAMENTO": { desc: "Accountability.", behaviors: "Assumir responsabilidade por resultados." },
+       "TER ATENÇÃO AOS RESULTADOS - COMPORTAMENTO": { desc: "Foco no coletivo.", behaviors: "Priorização do resultado organizacional." }
     };
 
     // GLOBAL STATE
-    let rawData = [], charts = {}, currentManagerData = null;
-    let filteredDataGlobal = [], filteredHeatCollaborators = [];
+    let rawData = [], draftData = [], currentFilteredData = [];
+    let charts = {}, currentManagerData = null;
     let allCriteria = new Set();
     let currentPage = 1, heatPage = 1;
     const itemsPerPage = 15;
-    let heatSort = { col: 'nome', ord: 'asc' }; // Inicia ordenado por Nome
+    let heatSort = { col: 'nome', ord: 'asc' };
 
     // --- UPLOAD ---
     function triggerUpload() { 
@@ -407,38 +420,60 @@
     }
     function normalize(str) { return str ? String(str).trim().toUpperCase() : ""; }
 
+    function getStatusLabel(avg) {
+        if(avg < 2.0) return { t: "MUITO ABAIXO", c: "#C0392B" };
+        if(avg < 3.0) return { t: "ABAIXO", c: "#E67E22" };
+        if(avg < 4.0) return { t: "ATENDE", c: "#2980B9" };
+        return { t: "ACIMA", c: "#27AE60" };
+    }
+
     function processData(rows) {
         if(!rows || rows.length < 2) throw new Error("Arquivo vazio");
-        const idxSuper=9, idxGestor=10, idxCrit=14, idxNota=18, idxTipo=15;
+        const idxSuper=9, idxGestor=10, idxCrit=14, idxNota=18, idxTipo=15, idxPapel=6, idxStatus=17;
         rows.shift();
         const map = {};
+        draftData = [];
         
         rows.forEach(r => {
             if (!r || r.length < 5) return;
+            const status = forceFixEncoding(r[idxStatus]);
             const matricula = forceFixEncoding(r[1]);
             const nome = forceFixEncoding(r[2]);
-            if(!nome) return;
+            const tipo = forceFixEncoding(r[idxTipo]);
             
+            if(status.toLowerCase() !== 'concluído' && status.toLowerCase() !== 'concluido') {
+                draftData.push({ nome: nome, tipo: tipo, gestor: forceFixEncoding(r[idxGestor]) });
+                return; 
+            }
+            
+            if(!nome) return;
             const uid = normalize(matricula) + "_" + normalize(nome);
             if(!map[uid]) {
                 map[uid] = {
                     uid: uid, cpf: forceFixEncoding(r[0]), matricula: matricula, nome: nome,
-                    cargo: forceFixEncoding(r[3]), unidade: forceFixEncoding(r[7]), dept: forceFixEncoding(r[8]),
+                    cargo: forceFixEncoding(r[3]), papel: forceFixEncoding(r[idxPapel]), unit: forceFixEncoding(r[7]), dept: forceFixEncoding(r[8]),
                     superintendencia: forceFixEncoding(r[idxSuper]) || "Geral",
                     gestor: forceFixEncoding(r[idxGestor]),
-                    criteriaScores: {}, sum: 0, count: 0, pdiIndex: 0, detailedScores: {}
+                    criteriaScores: {}, sum: 0, count: 0, detailedScores: {},
+                    hasSelf: false, hasManager: false
                 };
             }
             const crit = forceFixEncoding(r[idxCrit]) || 'Geral';
-            const tipo = forceFixEncoding(r[idxTipo]).toLowerCase();
             let val = parseFloat(String(r[idxNota]||"0").replace(',','.').replace('%',''));
 
             if(!isNaN(val)) {
                 map[uid].criteriaScores[crit] = val;
                 map[uid].sum += val; map[uid].count++;
                 if(!map[uid].detailedScores[crit]) map[uid].detailedScores[crit] = { final:0, self:0, manager:0 };
-                if(tipo.includes('auto')) map[uid].detailedScores[crit].self = val;
-                else { map[uid].detailedScores[crit].manager = val; map[uid].detailedScores[crit].final = val; }
+                
+                if(tipo.toLowerCase().includes('auto')) {
+                    map[uid].detailedScores[crit].self = val;
+                    map[uid].hasSelf = true;
+                } else { 
+                    map[uid].detailedScores[crit].manager = val; 
+                    map[uid].detailedScores[crit].final = val; 
+                    map[uid].hasManager = true;
+                }
                 allCriteria.add(crit);
             }
         });
@@ -454,99 +489,91 @@
     }
 
     function initDashboard() {
-        ['g','f','p','h','gMan'].forEach(p => populateInitialFilters(p));
-        updateGlobalFilters();
-        applyPartFilters();
-        updatePerformanceFilters();
-        const gSel = document.getElementById('gestaoSelect');
-        if(gSel && gSel.options.length > 1) { gSel.selectedIndex = 1; renderManagerProfile(); }
-        applyHeatmapFilters();
+        populateFilters();
+        
+        // Unified Draft Alert
+        if(draftData.length > 0) {
+            const draftMap = {};
+            draftData.forEach(d => {
+                if(!draftMap[d.nome]) draftMap[d.nome] = new Set();
+                draftMap[d.nome].add(d.tipo);
+            });
+            
+            let listHTML = '';
+            for (let [name, types] of Object.entries(draftMap)) {
+                listHTML += `<li>${name} (Falta: ${Array.from(types).join(', ')})</li>`;
+            }
+            
+            document.getElementById('draftAlertContainer').innerHTML = `
+                <div class="draft-alert">
+                    <h4><i class="fas fa-exclamation-circle"></i> Atenção: Avaliações em Rascunho detectadas (${Object.keys(draftMap).length} pessoas)
+                    <button class="btn-action no-print" onclick="document.getElementById('draftList').style.display = document.getElementById('draftList').style.display === 'none' ? 'block' : 'none'" style="margin-left:10px; font-size:0.8rem;">Expandir Detalhes</button>
+                    </h4>
+                    <p>As notas médias abaixo <strong>não</strong> consideram avaliações pendentes.</p>
+                    <ul id="draftList" class="draft-list">${listHTML}</ul>
+                </div>`;
+        }
+        
+        applyGlobalFilters('init');
     }
 
-    function populateInitialFilters(prefix) {
+    function populateFilters() {
         const uSuper = [...new Set(rawData.map(d=>d.superintendencia))].sort();
-        fillSelect(prefix+'Super', uSuper);
-        const uGestor = [...new Set(rawData.map(d=>d.gestor))].filter(g=>g).sort();
-        const uDept = [...new Set(rawData.map(d=>d.dept))].sort();
-        
-        let idGestor = prefix+'Gestor'; if(prefix==='gMan') idGestor='gestaoSelect';
-        let idDept = prefix+'Dept'; if(prefix==='gMan') idDept='gManDept';
-        
-        fillSelect(idGestor, uGestor);
-        fillSelect(idDept, uDept);
-        if(prefix==='f') fillSelect('fCargo', [...new Set(rawData.map(d=>d.cargo))].sort());
-        if(prefix==='g') { fillSelect('gargaloSuper', uSuper); fillSelect('gargaloGestor', uGestor); fillSelect('gargaloDept', uDept); fillSelect('gargaloCargo', [...new Set(rawData.map(d=>d.cargo))].sort()); }
+        fillSelect('globalSuper', uSuper);
+        fillSelect('globalGestor', [...new Set(rawData.map(d=>d.gestor))].sort());
+        fillSelect('globalDept', [...new Set(rawData.map(d=>d.dept))].sort());
+        fillSelect('gargaloPapel', [...new Set(rawData.map(d=>d.papel))].filter(p=>p).sort());
+        fillSelect('fCargo', [...new Set(rawData.map(d=>d.cargo))].sort());
     }
 
     function fillSelect(id, list) {
         const sel = document.getElementById(id); 
         if(!sel) return;
-        sel.innerHTML = '<option value="all">Todas/Selecione</option>';
+        const oldVal = sel.value;
+        sel.innerHTML = '<option value="all">Todos(as)</option>';
         list.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`);
+        if(list.includes(oldVal)) sel.value = oldVal; else sel.value = 'all';
     }
 
-    // Cascade: Super -> Gestor -> Dept -> Cargo
-    function updateCascadingFilters(prefix, source) {
-        let idSuper = prefix+'Super';
-        let idGestor = prefix+'Gestor'; if(prefix==='gMan') idGestor='gestaoSelect';
-        let idDept = prefix+'Dept'; if(prefix==='gMan') idDept='gManDept';
-        let idCargo = prefix+'Cargo';
-
-        const vSuper = document.getElementById(idSuper) ? document.getElementById(idSuper).value : 'all';
-        const vGestor = document.getElementById(idGestor) ? document.getElementById(idGestor).value : 'all';
-        const vDept = document.getElementById(idDept) ? document.getElementById(idDept).value : 'all';
-
+    // --- GLOBAL CASCADING FILTERS ---
+    function applyGlobalFilters(source) {
+        const vSuper = document.getElementById('globalSuper').value;
+        const vGestor = document.getElementById('globalGestor').value;
+        const vDept = document.getElementById('globalDept').value;
+        
         let subset = rawData;
         
-        if (source === 'super') {
-            if(vSuper !== 'all') subset = rawData.filter(d => d.superintendencia === vSuper);
-            const avGestors = [...new Set(subset.map(d => d.gestor))].filter(g=>g).sort();
-            fillSelect(idGestor, avGestors);
-            document.getElementById(idGestor).value = 'all';
-            
-            const avDepts = [...new Set(subset.map(d => d.dept))].sort();
-            fillSelect(idDept, avDepts);
-            document.getElementById(idDept).value = 'all';
-            
-            if(prefix === 'f') {
-                 const avCargos = [...new Set(subset.map(d=>d.cargo))].sort();
-                 fillSelect(idCargo, avCargos);
-            }
+        // 1. FILTERING
+        if(vSuper !== 'all') subset = subset.filter(d => d.superintendencia === vSuper);
+        if(vGestor !== 'all') subset = subset.filter(d => d.gestor === vGestor);
+        if(vDept !== 'all') subset = subset.filter(d => d.dept === vDept);
+        
+        // 2. CASCADING (Updating Options)
+        if(source === 'super') {
+             document.getElementById('globalGestor').value = 'all';
+             document.getElementById('globalDept').value = 'all';
+             const subSuper = (vSuper !== 'all') ? rawData.filter(d=>d.superintendencia === vSuper) : rawData;
+             fillSelect('globalGestor', [...new Set(subSuper.map(d=>d.gestor))].sort());
+             fillSelect('globalDept', [...new Set(subSuper.map(d=>d.dept))].sort());
+             subset = (vSuper !== 'all') ? rawData.filter(d=>d.superintendencia === vSuper) : rawData;
         }
         else if (source === 'gestor') {
-            if(vSuper !== 'all') subset = subset.filter(d => d.superintendencia === vSuper);
-            if(vGestor !== 'all') subset = subset.filter(d => d.gestor === vGestor);
-            const avDepts = [...new Set(subset.map(d => d.dept))].sort();
-            fillSelect(idDept, avDepts);
-            document.getElementById(idDept).value = 'all';
-            
-            if(prefix === 'f') {
-                 const avCargos = [...new Set(subset.map(d=>d.cargo))].sort();
-                 fillSelect(idCargo, avCargos);
-             }
-        }
-        else if (source === 'dept' && prefix === 'f') {
-            if(vSuper !== 'all') subset = subset.filter(d => d.superintendencia === vSuper);
-            if(vGestor !== 'all') subset = subset.filter(d => d.gestor === vGestor);
-            if(vDept !== 'all') subset = subset.filter(d => d.dept === vDept);
-            const avCargos = [...new Set(subset.map(d=>d.cargo))].sort();
-            fillSelect(idCargo, avCargos);
+             document.getElementById('globalDept').value = 'all';
+             fillSelect('globalDept', [...new Set(subset.map(d=>d.dept))].sort());
         }
 
-        if(prefix==='g') updateGlobalFilters();
-        if(prefix==='f') applyPartFilters();
-        if(prefix==='p') updatePerformanceFilters();
-        if(prefix==='gMan') updateGestaoFilters(source);
-        if(prefix==='h') applyHeatmapFilters();
+        currentFilteredData = subset;
+        
+        updateVisaoGeral();
+        applyPartFilters();
+        updatePerformanceFilters();
+        updateGestaoFilters();
+        applyHeatmapFilters();
     }
 
-    // --- TAB 1 ---
-    function updateGlobalFilters() {
-        const s = document.getElementById('gSuper').value;
-        const g = document.getElementById('gGestor').value;
-        const d = document.getElementById('gDept').value;
-        const data = rawData.filter(i => (s==='all'||i.superintendencia===s) && (g==='all'||i.gestor===g) && (d==='all'||i.dept===d));
-        
+    // --- VISÃO GERAL ---
+    function updateVisaoGeral() {
+        const data = currentFilteredData;
         const safeSet = (list) => new Set(list).size;
         document.getElementById('cntCargos').innerText = safeSet(data.map(i=>i.cargo));
         document.getElementById('cntDept').innerText = safeSet(data.map(i=>i.dept));
@@ -566,46 +593,23 @@
             document.getElementById('kpiWorstComp').innerText = `${sortedDesc[sortedDesc.length-1].k} (${sortedDesc[sortedDesc.length-1].v.toFixed(2)})`;
         }
 
-        const gd = groupBy(rawData,'dept'); createChart('chartDept', 'line', gd.l, gd.v, '#00849C');
-        const gc = groupBy(rawData,'cargo'); createChart('chartCargo', 'line', gc.l, gc.v, '#F39C12');
-        const gs = groupBy(rawData,'superintendencia'); createChart('chartSuper', 'line', gs.l, gs.v, '#27AE60');
+        const renderBlock = (idChart, idTable, key) => {
+            const grouped = groupBy(data, key);
+            createChart(idChart, 'bar', grouped.l, grouped.v, '#00849C');
+            const tbody = document.getElementById(idTable).getElementsByTagName('tbody')[0];
+            tbody.innerHTML = grouped.l.map((l, i) => `<tr><td>${l}</td><td>${grouped.v[i]}</td></tr>`).join('');
+        };
+        renderBlock('chartSuper', 'tableSuper', 'superintendencia');
+        renderBlock('chartDept', 'tableDept', 'dept');
+        renderBlock('chartCargo', 'tableCargo', 'cargo');
         
         updateGargaloFilters();
     }
     
-    function updateGargaloFilters(source) {
-        const s = document.getElementById('gargaloSuper').value;
-        const g = document.getElementById('gargaloGestor').value;
-        const d = document.getElementById('gargaloDept').value;
-        const c = document.getElementById('gargaloCargo').value;
-
-        // Cascade logic for Gargalos block
-        let sub = rawData;
-        if(source === 'super') {
-             if(s!=='all') sub = rawData.filter(d=>d.superintendencia===s);
-             fillSelect('gargaloGestor', [...new Set(sub.map(d=>d.gestor))].sort());
-             document.getElementById('gargaloGestor').value = 'all';
-             fillSelect('gargaloDept', [...new Set(sub.map(d=>d.dept))].sort());
-             document.getElementById('gargaloDept').value = 'all';
-             fillSelect('gargaloCargo', [...new Set(sub.map(d=>d.cargo))].sort());
-             document.getElementById('gargaloCargo').value = 'all';
-        } 
-        if (source === 'gestor') {
-             if(s!=='all') sub = sub.filter(d=>d.superintendencia===s);
-             if(g!=='all') sub = sub.filter(d=>d.gestor===g);
-             fillSelect('gargaloDept', [...new Set(sub.map(d=>d.dept))].sort());
-             document.getElementById('gargaloDept').value = 'all';
-             fillSelect('gargaloCargo', [...new Set(sub.map(d=>d.cargo))].sort());
-             document.getElementById('gargaloCargo').value = 'all';
-        }
-        if (source === 'dept') {
-             if(g!=='all') sub = sub.filter(d=>d.gestor===g);
-             if(d!=='all') sub = sub.filter(d=>d.dept===d);
-             fillSelect('gargaloCargo', [...new Set(sub.map(d=>d.cargo))].sort());
-             document.getElementById('gargaloCargo').value = 'all';
-        }
-
-        const data = rawData.filter(i => (s==='all'||i.superintendencia===s) && (g==='all'||i.gestor===g) && (d==='all'||i.dept===d) && (c==='all'||i.cargo===c));
+    function updateGargaloFilters() {
+        const p = document.getElementById('gargaloPapel').value;
+        const data = (p === 'all') ? currentFilteredData : currentFilteredData.filter(d => d.papel === p);
+        
         const critMap = {}; data.forEach(i=>i.scores.forEach(sc=>{if(!critMap[sc.crit])critMap[sc.crit]={s:0,c:0};critMap[sc.crit].s+=sc.nota;critMap[sc.crit].c++}));
         const sortedAsc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>a.v-b.v);
         
@@ -615,21 +619,11 @@
                  const worst = sortedAsc[0];
                  const best = sortedAsc[sortedAsc.length-1];
                  const opp = sortedAsc[Math.floor((sortedAsc.length-1)/2)];
-                 
                  const wDet = criteriaDetails[worst.k.toUpperCase()] || {desc: "Competência Crítica", behaviors: "Melhorar desempenho."};
-                 const bDet = criteriaDetails[best.k.toUpperCase()] || {desc: "Ponto Forte", behaviors: "Manter excelência."};
-
                  html = `<ul style="text-align:left; margin:0; padding-left:15px;">
-                    <li style="color:#C0392B; margin-bottom:8px;">
-                        <strong>🚨 Ponto de Atenção: ${worst.k} (${worst.v.toFixed(2)})</strong><br>
-                        <small><em>${wDet.desc}</em> Foco: ${wDet.behaviors}</small>
-                        <br><small style="color:#333;"><strong>Ação recomendada:</strong> Implementar programa de mentoria focado em ${worst.k.toLowerCase()} para elevar o padrão médio.</small>
-                    </li>
-                    <li style="color:#F39C12; margin-bottom:8px;"><strong>⚠️ Oportunidade:</strong> ${opp.k} (${opp.v.toFixed(2)})</li>
-                    <li style="color:#27AE60;">
-                        <strong>⭐ Destaque: ${best.k} (${best.v.toFixed(2)})</strong><br>
-                        <small>Referência em: ${bDet.desc}</small>
-                    </li>
+                    <li style="color:#C0392B;"><strong>🚨 Ponto de Atenção: ${worst.k} (${worst.v.toFixed(2)})</strong><br><small>${wDet.desc} - Ação: Programa de Mentoria.</small></li>
+                    <li style="color:#F39C12;"><strong>⚠️ Oportunidade:</strong> ${opp.k} (${opp.v.toFixed(2)})</li>
+                    <li style="color:#27AE60;"><strong>⭐ Destaque:</strong> ${best.k} (${best.v.toFixed(2)})</li>
                  </ul>`;
              }
              document.getElementById('gargaloInsight').innerHTML = html;
@@ -638,35 +632,49 @@
         createChart('chartGargalos', 'line', sortedAsc.map(x=>x.k), sortedAsc.map(x=>x.v), '#E74C3C');
     }
 
-    // --- TAB 2 ---
+    // --- TAB 2: PARTICIPANTES ---
     function applyPartFilters() {
-        const s = document.getElementById('fSuper').value;
-        const g = document.getElementById('fGestor').value;
-        const d = document.getElementById('fDept').value;
         const c = document.getElementById('fCargo').value;
         const txt = document.getElementById('fSearch').value.toLowerCase();
         const n = document.getElementById('fNota').value;
-        
-        filteredDataGlobal = rawData.filter(i => 
-            (s==='all'||i.superintendencia===s) && (g==='all'||i.gestor===g) && (d==='all'||i.dept===d) && (c==='all'||i.cargo===c) &&
-            (n==='all' || (n==='3' && i.avg<3) || (n==='4' && i.avg<4)) &&
+        let data = currentFilteredData.filter(i => 
+            (c==='all'||i.cargo===c) &&
+            (n==='all' || (n==='range1' && i.avg>=1 && i.avg<2) || (n==='range2' && i.avg>=2 && i.avg<3) || (n==='range3' && i.avg>=3 && i.avg<4) || (n==='range4' && i.avg>=4)) &&
             (i.nome.toLowerCase().includes(txt) || i.matricula.toLowerCase().includes(txt))
         );
-        currentPage=1; renderTable();
+        const availableCargos = [...new Set(currentFilteredData.map(d=>d.cargo))].sort();
+        const selCargo = document.getElementById('fCargo');
+        if(selCargo.options.length-1 !== availableCargos.length) {
+            const old = selCargo.value; selCargo.innerHTML = '<option value="all">Todos</option>';
+            availableCargos.forEach(v => selCargo.innerHTML += `<option value="${v}">${v}</option>`);
+            if(availableCargos.includes(old)) selCargo.value = old;
+        }
+        renderTablePart(data);
     }
     
-    function renderTable() {
+    function renderTablePart(data) {
         const start = (currentPage-1)*itemsPerPage;
-        const data = filteredDataGlobal.slice(start, start+itemsPerPage);
-        document.getElementById('resultCount').innerText = filteredDataGlobal.length;
+        const pageData = data.slice(start, start+itemsPerPage);
+        document.getElementById('resultCount').innerText = data.length;
         document.getElementById('pageIndicator').innerText = currentPage;
         
         const tbody = document.getElementById('tbodyPart');
         tbody.innerHTML = '';
-        data.forEach((p, idx) => {
+        pageData.forEach((p, idx) => {
+             const st = getStatusLabel(p.avg);
              const focus = p.avg >= 4 ? p.scores[p.scores.length-1] : p.scores[0];
              const pdi = generatePDI(focus.crit, focus.nota, p.avg>=4, p.gestor);
-             const tr = `<tr><td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td><td><strong>${p.nome}</strong><br><small>${p.cargo}</small></td><td>${p.gestor}<br><small>${p.dept}</small></td><td><span class="badge ${p.avg<3?'bg-red':'bg-green'}">${p.avg.toFixed(2)}</span></td><td>${pdi}</td><td><button class="btn-action" onclick="downloadParticipantPDF('${p.uid}')"><i class="fas fa-file-pdf"></i> Dossiê</button></td></tr><tr id="row-${idx}" class="row-detail"><td colspan="6" style="padding:20px;"><div class="detail-flex"><div class="detail-table"><h4>Detalhamento de Notas</h4><table>${p.scores.map(s=>`<tr><td style="border-bottom:1px solid #eee;padding:5px;">${s.crit}</td><td style="border-bottom:1px solid #eee;padding:5px;font-weight:bold;">${s.nota.toFixed(2)}</td></tr>`).join('')}</table></div><div class="detail-charts" style="width:100%"><div class="detail-chart-box"><h5>Comparativo (Auto vs Gestor)</h5><div class="radar-wrapper"><div class="radar-container"><canvas id="rad-${idx}"></canvas></div></div></div></div></div></td></tr>`;
+             
+             // Check Missing Evals
+             let alertMissing = "";
+             if(!p.hasSelf || !p.hasManager) {
+                 let missing = [];
+                 if(!p.hasSelf) missing.push("Autoavaliação");
+                 if(!p.hasManager) missing.push("Gestor");
+                 alertMissing = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; margin-bottom:10px; font-weight:bold; font-size:0.8rem;"><i class="fas fa-exclamation-triangle"></i> Atenção: Média parcial. Falta: ${missing.join(", ")}</div>`;
+             }
+
+             const tr = `<tr><td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td><td><strong>${p.nome}</strong><br><small>${p.cargo}</small></td><td>${p.gestor}<br><small>${p.dept}</small></td><td><div class="status-label" style="color:${st.c}">${st.t}</div><span class="badge" style="background:${st.c}20; color:${st.c}">${p.avg.toFixed(2)}</span></td><td>${pdi}</td><td><button class="btn-action no-print" onclick="downloadParticipantPDF('${p.uid}')"><i class="fas fa-file-pdf"></i> Dossiê</button></td></tr><tr id="row-${idx}" class="row-detail"><td colspan="6" style="padding:20px;"><div class="detail-flex">${alertMissing}<div class="detail-table"><h4>Detalhamento de Notas</h4><table>${p.scores.map(s=>`<tr><td>${s.crit}</td><td>${s.nota.toFixed(2)}</td></tr>`).join('')}</table></div><div class="detail-charts" style="width:100%"><div class="detail-chart-box"><h5>Comparativo (Auto vs Gestor)</h5><div class="radar-wrapper"><div class="radar-container"><canvas id="rad-${idx}"></canvas></div></div></div></div></div></td></tr>`;
              tbody.innerHTML += tr;
              setTimeout(() => {
                  new Chart(document.getElementById(`rad-${idx}`), {
@@ -677,64 +685,43 @@
              }, 100);
         });
     }
-    
+
     function generatePDI(crit, nota, isHigh, gestor) {
         const det = criteriaDetails[crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhorar desempenho geral."};
         if(isHigh) {
             return `<div style="background:#E8F5E9; padding:12px; border-radius:8px; font-size:0.85rem;">
             <strong>🚀 Expansão: ${crit}</strong> (${det.desc})
             <ul style="margin:5px 0 5px 15px;">
-                <li><strong>70%:</strong> Ser mentor no comportamento: "${det.behaviors.substring(0, 50)}..."</li>
-                <li><strong>20%:</strong> Trocar práticas com lideranças.</li>
-                <li><strong>10%:</strong> Certificação avançada.</li>
+                <li><strong>70% (Prática):</strong> Liderar squad focado em inovação de processos usando ${crit}. Mentorar novos colaboradores.</li>
+                <li><strong>20% (Troca):</strong> Benchmark externo com empresas referência e apresentação de insights para a diretoria.</li>
+                <li><strong>10% (Formal):</strong> MBA ou Especialização Avançada.</li>
             </ul>
-            <strong>🎯 SMART:</strong> "Formar 2 sucessores em ${crit} até o Q4."</div>`;
+            <strong>🎯 SMART:</strong> "Aumentar a eficiência do setor em 15% aplicando ${crit} em novos projetos até o final do ano."</div>`;
         } else {
             return `<div style="background:#FFF3E0; padding:12px; border-radius:8px; font-size:0.85rem;">
             <strong>🛠️ Recuperação: ${crit}</strong> (${det.desc})
             <ul style="margin:5px 0 5px 15px;">
-                <li><strong>70%:</strong> Realizar tarefas monitoradas focadas em ${crit}, registrando evoluções diárias.</li>
-                <li><strong>20%:</strong> Sessões de role-play ou feedback reverso com ${gestor} focadas em bloqueios específicos.</li>
-                <li><strong>10%:</strong> Análise crítica de cases de sucesso na empresa sobre ${crit}.</li>
+                <li><strong>70% (Prática):</strong> Executar plano de ação corretivo com supervisão diária. Realizar entregas críticas em par (Pairing).</li>
+                <li><strong>20% (Troca):</strong> Feedback semanal estruturado com ${gestor} focado em evidências de mudança comportamental.</li>
+                <li><strong>10% (Formal):</strong> Releitura e prova de conhecimento dos manuais internos e políticas da área.</li>
             </ul>
-            <strong>🎯 SMART:</strong> "Subir nota para 3.5 em ${crit} no próximo ciclo."</div>`;
+            <strong>🎯 SMART:</strong> "Eliminar 100% dos erros operacionais em ${crit} e atingir nota mínima de 3.0 em 3 meses."</div>`;
         }
     }
 
     function downloadParticipantPDF(uid) {
         const p = rawData.find(x => x.uid === uid);
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(18); doc.setTextColor(15, 76, 117); doc.text(`Dossiê de Performance: ${p.nome}`, 14, 20);
-        doc.setFontSize(11); doc.setTextColor(50); doc.text(`Cargo: ${p.cargo} | Dept: ${p.dept} | Gestor: ${p.gestor}`, 14, 30);
-        doc.text(`Média Final: ${p.avg.toFixed(2)}`, 14, 38);
-        doc.autoTable({ startY: 45, head: [['Competência', 'Nota']], body: p.scores.map(s => [s.crit, s.nota.toFixed(2)]), theme: 'striped', headStyles: { fillColor: [15, 76, 117] } });
-        let finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(14); doc.setTextColor(15, 76, 117); doc.text("Plano de Desenvolvimento Individual (PDI)", 14, finalY);
-        
-        const focus = p.avg >= 4 ? p.scores[p.scores.length-1] : p.scores[0];
-        const isHigh = p.avg >= 4;
-        const det = criteriaDetails[focus.crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhoria contínua."};
-        
-        const pdiText = isHigh 
-            ? `Foco: Expansão em ${focus.crit}.\nConceito: ${det.desc}\n\nAção Prática: Disseminar o comportamento "${det.behaviors}".\n\nMeta SMART: "Aumentar eficiência da área em 10% através de ${focus.crit} em 6 meses."`
-            : `Foco: Recuperação em ${focus.crit}.\nConceito: ${det.desc}\n\nAção Prática: Realizar tarefas monitoradas focadas em ${focus.crit}, registrando evoluções diárias.\n\nMeta SMART: "Eliminar erros em ${focus.crit} e atingir nota 3.5 no próximo ciclo."`;
-            
-        doc.setFontSize(11); doc.setTextColor(0);
-        const splitText = doc.splitTextToSize(pdiText, 180);
-        doc.text(splitText, 14, finalY + 10);
-        
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.setFontSize(18); doc.text(`Dossiê: ${p.nome}`, 14, 20);
+        doc.setFontSize(11); doc.text(`Cargo: ${p.cargo} | Média: ${p.avg.toFixed(2)}`, 14, 30);
+        doc.autoTable({ startY: 40, head: [['Competência', 'Nota']], body: p.scores.map(s => [s.crit, s.nota.toFixed(2)]) });
         doc.save(`Dossie_${p.nome}.pdf`);
     }
 
-    // --- TAB 3 ---
+    // --- TAB 3 PERFORMANCE ---
     function updatePerformanceFilters() {
-        const s = document.getElementById('pSuper').value;
-        const d = document.getElementById('pDept').value;
-        const g = document.getElementById('pGestor').value;
-        const sub = rawData.filter(i => (s==='all'||i.superintendencia===s) && (d==='all'||i.dept===d) && (g==='all'||i.gestor===g));
-        
-        const conc = {}; sub.forEach(i => { const k=i.superintendencia; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<1.5)conc[k][0]++; else if(i.avg<2.5)conc[k][1]++; else if(i.avg<3.5)conc[k][2]++; else conc[k][3]++; });
+        const sub = currentFilteredData; 
+        const conc = {}; sub.forEach(i => { const k=i.superintendencia; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<2)conc[k][0]++; else if(i.avg<3)conc[k][1]++; else if(i.avg<4)conc[k][2]++; else conc[k][3]++; });
         const lbls = Object.keys(conc);
         if(charts.concepts) charts.concepts.destroy();
         charts.concepts = new Chart(document.getElementById('chartConcepts'), {
@@ -748,8 +735,8 @@
         });
 
         let q1=0,q2=0,q3=0,q4=0;
-        sub.forEach(x => { if(x.avg<2.5)q1++; else if(x.avg<3.5)q2++; else if(x.avg<4.5)q3++; else q4++; });
-        createChart('chartQuartis', 'bar', ['Q1','Q2','Q3','Q4'], [q1,q2,q3,q4], ['#E74C3C','#F39C12','#3498DB','#27AE60']);
+        sub.forEach(x => { if(x.avg<2)q1++; else if(x.avg<3)q2++; else if(x.avg<4)q3++; else q4++; });
+        createChart('chartQuartis', 'bar', ['Q1 (<2)','Q2 (2-3)','Q3 (3-4)','Q4 (>4)'], [q1,q2,q3,q4], ['#C0392B','#E74C3C','#3498DB','#27AE60']);
 
         const compMap = {}; sub.forEach(p=>p.scores.forEach(s=>{ if(!compMap[s.crit]) compMap[s.crit]={s:0,c:0}; compMap[s.crit].s+=s.nota; compMap[s.crit].c++; }));
         const listComp = Object.entries(compMap).map(([k,v])=>({k, v:v.s/v.c})).sort((a,b)=>b.v-a.v);
@@ -757,35 +744,25 @@
     }
 
     // --- TAB 4 GESTAO ---
-    function updateGestaoFilters(source) {
-        const s = document.getElementById('gManSuper').value;
-        const d = document.getElementById('gManDept').value;
-        const g = document.getElementById('gestaoSelect').value;
-        
-        let subset = rawData.filter(i => (s==='all'||i.superintendencia===s) && (d==='all'||i.dept===d));
-        
-        if(source !== 'gestor') {
-             const gestores = [...new Set(subset.map(d=>d.gestor))].filter(g=>g&&g!=='N/A').sort();
-             const sel = document.getElementById('gestaoSelect');
-             const cur = sel.value;
-             sel.innerHTML = '<option value="all">Visão Agregada</option>';
-             gestores.forEach(g => sel.innerHTML += `<option value="${g}">${g}</option>`);
-             if(gestores.includes(cur)) sel.value = cur;
-        }
+    function updateGestaoFilters() {
+        const gestores = [...new Set(currentFilteredData.map(d=>d.gestor))].filter(g=>g&&g!=='N/A').sort();
+        const sel = document.getElementById('gestaoSelect');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="all">Visão Agregada</option>';
+        gestores.forEach(g => sel.innerHTML += `<option value="${g}">${g}</option>`);
+        if(gestores.includes(cur)) sel.value = cur;
         renderManagerProfile();
     }
     
     function renderManagerProfile() {
         const g = document.getElementById('gestaoSelect').value;
-        const s = document.getElementById('gManSuper').value;
-        const d = document.getElementById('gManDept').value;
+        const subset = (g === 'all') ? currentFilteredData : currentFilteredData.filter(i => i.gestor === g);
+        
         document.getElementById('gestorProfile').style.display='block';
         document.getElementById('gestorName').innerText = (g !== 'all') ? g : "Visão Agregada";
+        document.getElementById('gestorHeadcount').innerText = subset.length;
         
-        const team = rawData.filter(i=> (g==='all'||i.gestor===g) && (s==='all'||i.superintendencia===s) && (d==='all'||i.dept===d));
-        document.getElementById('gestorHeadcount').innerText = team.length;
-        
-        const crit = {}; team.forEach(t=>t.scores.forEach(sc=>{if(!crit[sc.crit])crit[sc.crit]={s:0,c:0};crit[sc.crit].s+=sc.nota;crit[sc.crit].c++}));
+        const crit = {}; subset.forEach(t=>t.scores.forEach(sc=>{if(!crit[sc.crit])crit[sc.crit]={s:0,c:0};crit[sc.crit].s+=sc.nota;crit[sc.crit].c++}));
         const list = Object.entries(crit).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>b.v-a.v);
         
         if(list.length > 0) {
@@ -793,92 +770,73 @@
             document.getElementById('gestorBottom3').innerHTML = list.slice(-3).reverse().map(x=>`<li>${x.k} (${x.v.toFixed(2)})</li>`).join('');
             
             const gap = list[list.length-1];
-            const det = criteriaDetails[gap.k.toUpperCase()] || {desc: "Foco em resultados", behaviors: "Melhorar entrega."};
+            const strong = list[0];
+            const det = criteriaDetails[gap.k.toUpperCase()] || {desc: "Resultados", behaviors: "Melhoria contínua."};
             
             document.getElementById('gestorActionPlan').innerHTML = `
-                <strong>PDCA (Foco: ${gap.k})</strong>
+                <div style="background:#f0f7ff; padding:15px; border-radius:8px; margin-bottom:15px; font-size:0.9rem;">
+                    <strong>SWOT (Foco Estratégico):</strong><br>
+                    <strong>Strengths:</strong> Equipe domina ${strong.k}, o que pode alavancar novos projetos.<br>
+                    <strong>Weaknesses:</strong> Gap em ${gap.k} está gerando retrabalho/atrasos.<br>
+                    <strong>Opportunities:</strong> Criar programa de Mentoria Interna usando os top performers.<br>
+                    <strong>Threats:</strong> Perda de competitividade se ${gap.k} não for corrigido em 60 dias.
+                </div>
+                <strong>PDCA (${gap.k})</strong>
                 <ul style="font-size:0.9rem;">
-                    <li><strong>Plan:</strong> Mapear quais comportamentos específicos de ${gap.k} estão ausentes (ex: "${det.behaviors.substring(0,30)}...") e impactando o resultado.</li>
-                    <li><strong>Do:</strong> Conduzir workshop prático de alinhamento de expectativas e treinamento on-the-job.</li>
-                    <li><strong>Check:</strong> Instituir 'Checkpoint de ${gap.k}' nas reuniões semanais para medir avanços.</li>
-                    <li><strong>Act:</strong> Reconhecer publicamente avanços ou iniciar plano de recuperação individual se necessário.</li>
+                    <li><strong>Plan:</strong> Analisar a causa raiz da falha em "${det.behaviors}". Definir cronograma de capacitação.</li>
+                    <li><strong>Do:</strong> Executar workshops práticos e rotação de funções (Job Rotation) para forçar aprendizado.</li>
+                    <li><strong>Check:</strong> Medir KPIs de ${gap.k} semanalmente e realizar pulsos de clima.</li>
+                    <li><strong>Act:</strong> Padronizar os novos processos e reconhecer publicamente as melhorias.</li>
                 </ul>
-                <div style="margin-top:10px; background:#e3f2fd; padding:10px; border-radius:8px;"><strong>🎯 SMART:</strong> "Elevar média em ${gap.k} para 3.8 até o fim do ciclo."</div>
+                <div style="margin-top:10px; background:#e3f2fd; padding:10px; border-radius:8px;"><strong>🎯 SMART:</strong> "Aumentar a nota média da equipe em ${gap.k} de ${gap.v.toFixed(2)} para 3.5 em 4 meses, reduzindo erros em 20%."</div>
             `;
-            currentManagerData = { name: (g!=='all'?g:'Visão Agregada'), teamSize: team.length, top3: list.slice(0,3), bottom3: list.slice(-3) };
+            currentManagerData = { name: (g!=='all'?g:'Visão Agregada'), teamSize: subset.length, top3: list.slice(0,3), bottom3: list.slice(-3) };
         }
     }
-
-    function clearGestaoFilters() { document.getElementById('gManSuper').value = 'all'; updateCascadingFilters('gMan', 'super'); }
+    
     function downloadManagerPDF() {
         if(!currentManagerData) return;
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.setFontSize(20); doc.setTextColor(15, 76, 117); doc.text(`Dossiê de Gestão: ${currentManagerData.name}`, 14, 20);
-        doc.setFontSize(12); doc.setTextColor(50); doc.text(`Total Liderados: ${currentManagerData.teamSize}`, 14, 30);
-        doc.autoTable({ startY: 40, head: [['Top 3 Fortalezas', 'Média']], body: currentManagerData.top3.map(x => [x.k, x.v.toFixed(2)]), theme: 'grid', headStyles: { fillColor: [40, 167, 69] } });
-        doc.autoTable({ startY: doc.lastAutoTable.finalY + 10, head: [['Top 3 Gaps', 'Média']], body: currentManagerData.bottom3.map(x => [x.k, x.v.toFixed(2)]), theme: 'grid', headStyles: { fillColor: [220, 53, 69] } });
-        let y = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(14); doc.setTextColor(15, 76, 117); doc.text("Plano de Ação Sugerido", 14, y);
-        doc.setFontSize(11); doc.setTextColor(0);
-        const gap = currentManagerData.bottom3[currentManagerData.bottom3.length-1];
-        doc.text(`Foco Principal: ${gap.k}\n\n1. Plan: Investigar causas.\n2. Do: Treinamento prático.\n3. Check: Monitorar.\n4. Act: Ajustar.\n\nMeta SMART: Elevar ${gap.k} para 3.8.`, 14, y + 10);
+        doc.text(`Gestão: ${currentManagerData.name}`, 14, 20);
+        doc.autoTable({ startY: 30, head: [['Top 3 Fortalezas', 'Média']], body: currentManagerData.top3.map(x => [x.k, x.v.toFixed(2)]) });
         doc.save(`Gestao_${currentManagerData.name}.pdf`);
     }
 
     // --- TAB 5 ---
     function applyHeatmapFilters() {
-         const s = document.getElementById('hSuper').value;
-         const g = document.getElementById('hGestor').value;
-         const d = document.getElementById('hDept').value;
          const txt = document.getElementById('hSearch').value.toLowerCase();
-         filteredHeatCollaborators = rawData.filter(i => 
-            (s==='all'||i.superintendencia===s) && 
-            (g==='all'||i.gestor===g) && 
-            (d==='all'||i.dept===d) && 
-            i.nome.toLowerCase().includes(txt)
-         );
+         filteredHeatCollaborators = currentFilteredData.filter(i => i.nome.toLowerCase().includes(txt));
          renderHeatmap();
     }
     
-    function clearHeatFilters() { document.getElementById('hSuper').value = 'all'; updateCascadingFilters('h', 'super'); document.getElementById('hSearch').value = ''; }
-
+    function clearHeatFilters() { document.getElementById('hSearch').value = ''; applyHeatmapFilters(); }
     function sortHeatmap(col) {
         if(heatSort.col === col) { heatSort.ord = (heatSort.ord === 'asc') ? 'desc' : 'asc'; } else { heatSort.col = col; heatSort.ord = 'asc'; }
         renderHeatmap();
     }
-
     function renderHeatmap() {
         filteredHeatCollaborators.sort((a,b) => {
-            let valA = (heatSort.col === 'avg') ? a.avg : (a.criteriaScores[heatSort.col] || 0);
-            let valB = (heatSort.col === 'avg') ? b.avg : (b.criteriaScores[heatSort.col] || 0);
-            if(heatSort.col === 'nome') { valA = a.nome; valB = b.nome; return (heatSort.ord === 'asc') ? valA.localeCompare(valB) : valB.localeCompare(valA); }
+            let valA = (heatSort.col === 'nome') ? a.nome : (heatSort.col === 'avg') ? a.avg : (a.criteriaScores[heatSort.col] || 0);
+            let valB = (heatSort.col === 'nome') ? b.nome : (heatSort.col === 'avg') ? b.avg : (b.criteriaScores[heatSort.col] || 0);
+            if(typeof valA === 'string') return (heatSort.ord === 'asc') ? valA.localeCompare(valB) : valB.localeCompare(valA);
             return (heatSort.ord === 'asc') ? valA - valB : valB - valA;
         });
 
-        const totalPages = Math.ceil(filteredHeatCollaborators.length / itemsPerPage) || 1;
-        if(heatPage > totalPages) heatPage = 1;
-        
-        const start = (heatPage-1)*itemsPerPage;
-        const d = filteredHeatCollaborators.slice(start, start+itemsPerPage);
-        
+        const d = filteredHeatCollaborators.slice((heatPage-1)*itemsPerPage, heatPage*itemsPerPage);
         const h = document.getElementById('headHeat');
         const b = document.getElementById('tbodyHeat');
         const crits = Array.from(allCriteria).sort();
         
-        h.innerHTML = `<tr>
-            <th class="col-fixed" onclick="sortHeatmap('nome')">Nome ${heatSort.col==='nome'?'⇅':''}</th>
-            <th onclick="sortHeatmap('avg')">Média ${heatSort.col==='avg'?'⇅':''}</th>
-            ${crits.map(c=>`<th onclick="sortHeatmap('${c}')">${c} ${heatSort.col===c?'⇅':''}</th>`).join('')}
-        </tr>`;
-        
+        h.innerHTML = `<tr><th class="col-fixed" onclick="sortHeatmap('nome')">Nome</th><th onclick="sortHeatmap('avg')">Média</th>${crits.map(c=>`<th onclick="sortHeatmap('${c}')">${c}</th>`).join('')}</tr>`;
         b.innerHTML = '';
         d.forEach(p => {
+            const st = getStatusLabel(p.avg);
             let cells = crits.map(c => {
                 const val = p.criteriaScores[c];
                 const cls = val<3?'heat-red':(val<4?'heat-yellow':'heat-green');
                 return `<td style="text-align:center"><span class="heat-cell ${cls}">${val?val.toFixed(2):'-'}</span></td>`;
             }).join('');
-            b.innerHTML += `<tr><td class="col-fixed">${p.nome}</td><td>${p.avg.toFixed(2)}</td>${cells}</tr>`;
+            b.innerHTML += `<tr><td class="col-fixed"><strong>${p.nome}</strong><br><span style="font-size:0.65rem; color:${st.c}; font-weight:800;">${st.t}</span></td><td>${p.avg.toFixed(2)}</td>${cells}</tr>`;
         });
         document.getElementById('heatCount').innerText = filteredHeatCollaborators.length;
         document.getElementById('pageIndicatorHeat').innerText = heatPage;
@@ -886,15 +844,11 @@
     
     function changeHeatPage(d) {
         const total = Math.ceil(filteredHeatCollaborators.length / itemsPerPage) || 1;
-        heatPage += d;
-        if(heatPage < 1) heatPage = 1;
-        if(heatPage > total) heatPage = total;
+        heatPage += d; if(heatPage < 1) heatPage = 1; if(heatPage > total) heatPage = total;
         renderHeatmap();
     }
-    
     function changePage(d) { currentPage+=d; renderTable(); }
 
-    // --- HELPERS ---
     function groupBy(data, key) {
         const m = {}; data.forEach(i=>{if(!m[i[key]])m[i[key]]={s:0,c:0};m[i[key]].s+=i.avg;m[i[key]].c++});
         const s = Object.entries(m).sort((a,b)=>(b[1].s/b[1].c)-(a[1].s/a[1].c));
@@ -912,8 +866,8 @@
     }
 
     function toggleDetails(id) { const el=document.getElementById(id); el.style.display=el.style.display==='table-row'?'none':'table-row'; }
-    function clearGlobalFilters() { document.getElementById('gSuper').value = 'all'; updateCascadingFilters('g', 'super'); }
-    function clearPartFilters() { document.getElementById('fSuper').value = 'all'; updateCascadingFilters('f', 'super'); }
+    function clearGlobalFilters() { document.getElementById('globalSuper').value = 'all'; applyGlobalFilters('super'); }
+    function clearPartFilters() { document.getElementById('fCargo').value = 'all'; applyPartFilters(); }
     function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
