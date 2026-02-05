@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Executivo | Avaliação de Desempenho</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0F4C75; --primary-light: #3282B8; --accent: #BBE1FA; --dark: #1B262C;
+            --text-main: #333333; --text-light: #666666; --bg-body: #F0F2F5; --surface: #FFFFFF;
+            --success: #28A745; --warning: #FFC107; --danger: #DC3545; --info: #17A2B8;
+            --radius: 12px; --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --transition: all 0.3s ease;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; font-size: 14px; }
+        
+        /* HEADER */
+        header { background: var(--surface); padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); border-bottom: 1px solid #e1e4e8; position: sticky; top: 0; z-index: 1000; }
+        .brand-area { display: flex; align-items: center; gap: 15px; }
+        .company-logo-text { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-transform: uppercase; border-left: 4px solid var(--primary-light); padding-left: 15px; }
+        .dashboard-title { font-size: 0.9rem; color: var(--text-light); font-weight: 500; }
+        .header-actions button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 8px; }
+        .header-actions button:hover { background: var(--primary-light); transform: translateY(-1px); }
+
+        /* TABS */
+        .nav-tabs { background: var(--dark); padding: 0 2rem; display: flex; gap: 1rem; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-btn { background: none; border: none; padding: 1.2rem 1.5rem; font-size: 0.9rem; font-weight: 500; color: rgba(255, 255, 255, 0.6); cursor: pointer; border-bottom: 4px solid transparent; transition: var(--transition); white-space: nowrap; }
+        .nav-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-btn.active { color: white; border-bottom-color: var(--warning); font-weight: 700; background: rgba(255,255,255,0.1); }
+        
+        .container { width: 100%; max-width: 100%; padding: 2rem; box-sizing: border-box; padding-bottom: 80px; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease-out; } .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem; border: 1px solid #eef0f2; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+        .card-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+        
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .info-box { background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 20px; border-radius: var(--radius); text-align: center; border: 1px solid #e0e0e0; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+        .info-box::after { content: ''; position: absolute; top:0; left:0; width: 4px; height: 100%; background: var(--primary); }
+        .info-box h4 { margin: 5px 0; font-size: 2rem; font-weight: 800; color: var(--dark); }
+        .info-box span { font-size: 0.85rem; text-transform: uppercase; font-weight: 600; color: var(--text-light); letter-spacing: 1px;}
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 2rem; }
+        .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); border-top: 4px solid var(--primary); text-align: left; }
+        .kpi-lbl { font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .kpi-val { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
+
+        .filter-bar { background: #f8f9fa; padding: 1.5rem; border-radius: var(--radius); border: 1px solid #e0e0e0; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 25px; }
+        .filter-group { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
+        .filter-group label { font-size: 0.75rem; font-weight: 700; margin-bottom: 6px; color: var(--text-light); text-transform: uppercase; }
+        select, input { padding: 10px 15px; border: 1px solid #ccc; border-radius: 6px; background-color: white; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+        select:focus, input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.1); }
+        
+        .btn-reset { background: white; border: 1px solid #ccc; color: var(--text-main); padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; height: 42px; display: flex; align-items: center; gap: 5px; }
+        .btn-reset:hover { background: #e2e6ea; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #f1f3f5; text-align: left; padding: 12px 15px; color: var(--dark); font-weight: 700; border-bottom: 2px solid #dee2e6; text-transform: uppercase; font-size: 0.8rem; cursor: pointer; }
+        th:hover { background-color: #e9ecef; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        tr:hover td { background-color: #f8f9fa; }
+        .row-detail { display: none; background: #fafafa; }
+        
+        .btn-icon { background: white; border: 1px solid #dee2e6; border-radius: 6px; padding: 6px 10px; cursor: pointer; color: var(--text-light); transition: 0.2s; }
+        .btn-icon:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .btn-action { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; margin-right: 5px; }
+        .btn-action:hover { background: var(--primary); color: white; }
+
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; padding: 10px; }
+        .btn-page { background: white; border: 1px solid #dee2e6; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--dark); transition: 0.2s; }
+        .btn-page:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .upload-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .upload-box { background: white; padding: 3rem; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-width: 500px; width: 90%; border-top: 6px solid var(--primary); }
+        .company-input { width: 100%; padding: 15px; font-size: 1.1rem; margin: 20px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; }
+        .upload-btn-main { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-size: 1.1rem; font-weight: 700; transition: 0.3s; box-shadow: 0 5px 15px rgba(15, 76, 117, 0.3); }
+        .upload-btn-main:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-row-vertical { display: flex; flex-direction: column; gap: 30px; } 
+        .chart-container { position: relative; width: 100%; height: 400px; } 
+        .chart-explanation { font-size: 0.85rem; color: var(--text-light); background: #f8f9fa; padding: 12px; margin-top: 10px; border-radius: 8px; border-left: 3px solid var(--info); }
+
+        .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; display: inline-block; }
+        .bg-red { background: #fee2e2; color: #b91c1c; }
+        .bg-green { background: #d1fae5; color: #047857; }
+        
+        .radar-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px; }
+        .radar-container { height: 350px; width: 350px; position: relative; margin: 0 auto; }
+        
+        .detail-flex { display: flex; gap: 25px; flex-wrap: wrap; align-items: flex-start; }
+        .detail-table { flex: 1; min-width: 350px; border: 1px solid #eee; border-radius: 12px; padding: 15px; background: white; box-shadow: var(--shadow-sm); }
+        .detail-charts { flex: 1; min-width: 350px; display: flex; gap: 15px; }
+        .detail-chart-box { flex: 1; background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; }
+
+        #tableHeat th:not(.col-fixed) { max-width: 70px; font-size: 0.7rem; vertical-align: bottom; white-space: normal; }
+        .heat-cell { display: block; border-radius: 4px; color: white; font-weight: bold; padding: 4px 0; font-size: 0.75rem; }
+        .heat-red { background: var(--danger); }
+        .heat-yellow { background: var(--warning); color: #333; }
+        .heat-green { background: var(--success); }
+        .col-fixed { position: sticky; left: 0; background: #fff; z-index: 10; border-right: 2px solid #eee; min-width: 120px; max-width: 150px; }
+
+        @media(max-width: 1000px){ .chart-row { grid-template-columns: 1fr; } .info-grid { grid-template-columns: 1fr 1fr; } .detail-charts { flex-direction: column; } }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="uploadScreen" class="upload-overlay">
+    <div class="upload-box">
+        <div style="margin-bottom: 20px; color: var(--primary); font-size: 3rem;"><i class="fas fa-chart-line"></i></div>
+        <h1 style="color: var(--dark); margin-bottom: 10px; font-weight: 800;">Analytics de Performance</h1>
+        <p style="color: var(--text-light); margin-bottom: 30px;">Faça o upload dos dados para gerar o dashboard executivo.</p>
+        <input type="text" id="companyNameInput" class="company-input" placeholder="Digite o nome da empresa aqui...">
+        <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="handleFile(this)">
+        <button onclick="triggerUpload()" id="btnUpload" class="upload-btn-main">
+            <i class="fas fa-cloud-upload-alt"></i> Carregar Base de Dados
+        </button>
+    </div>
+</div>
+
+<div id="mainInterface" class="hidden">
+    <header>
+        <div class="brand-area">
+            <div id="headerLogo" class="company-logo-text">EMPRESA</div>
+            <div class="dashboard-title">| Dashboard Estratégico</div>
+        </div>
+        <div class="header-actions">
+            <button onclick="window.print()"><i class="fas fa-print"></i> Exportar PDF</button>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('geral')"><i class="fas fa-home"></i> Visão Geral</button>
+        <button class="nav-btn" onclick="switchTab('participantes')"><i class="fas fa-users"></i> Participantes & PDI</button>
+        <button class="nav-btn" onclick="switchTab('performance')"><i class="fas fa-chart-bar"></i> Indicadores & Performance</button>
+        <button class="nav-btn" onclick="switchTab('gestao')"><i class="fas fa-briefcase"></i> Indicadores de Gestão</button>
+        <button class="nav-btn" onclick="switchTab('heatmap')"><i class="fas fa-th"></i> Mapa de Calor</button>
+    </nav>
+
+    <div class="container">
+        
+        <div id="tab-geral" class="tab-content active">
+            
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-filter"></i> Filtros Globais (Impactam Indicadores Acima)</h3></div>
+                <div class="filter-bar" style="margin:0; border:none; background:transparent; padding:0;">
+                    <div class="filter-group"><label>Superintendência</label><select id="gSuper" onchange="updateCascadingFilters('g', 'super')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Gestor</label><select id="gGestor" onchange="updateCascadingFilters('g', 'gestor')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Departamento</label><select id="gDept" onchange="updateCascadingFilters('g', 'dept')"><option value="all">Todas</option></select></div>
+                    <button class="btn-reset" onclick="clearGlobalFilters()"><i class="fas fa-eraser"></i> Limpar</button>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-box"><h4 id="cntCargos">0</h4><span>💼 Cargos Únicos</span></div>
+                <div class="info-box"><h4 id="cntDept">0</h4><span>🏢 Departamentos</span></div>
+                <div class="info-box"><h4 id="cntSuper">0</h4><span>🏛️ Superintendências</span></div>
+                <div class="info-box"><h4 id="cntGestores">0</h4><span>👥 Gestores</span></div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-lbl">Total Participantes</div><div class="kpi-val" id="kpiTotal">0 🧑‍🤝‍🧑</div></div>
+                <div class="kpi-card"><div class="kpi-lbl">Média Geral</div><div class="kpi-val" id="kpiMedia">0.0 📊</div></div>
+                <div class="kpi-card" style="border-left-color: var(--danger);"><div class="kpi-lbl">Com GAP (<3.0)</div><div class="kpi-val" id="kpiGaps">0 ⚠️</div></div>
+                <div class="kpi-card" style="border-left-color: var(--success);"><div class="kpi-lbl">Melhor Competência</div><div class="kpi-val" id="kpiBestComp">- 🏆</div></div>
+                <div class="kpi-card" style="border-left-color: var(--warning);"><div class="kpi-lbl">Menor Competência</div><div class="kpi-val" id="kpiWorstComp">- 📉</div></div>
+            </div>
+
+            <div class="chart-row-vertical" style="margin-top:20px;">
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média Global por Superintendência</h3></div>
+                    <div id="containerSuper" class="chart-container"><canvas id="chartSuper"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média Global por Departamento</h3></div>
+                    <div id="containerDept" class="chart-container"><canvas id="chartDept"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média Global por Cargo</h3></div>
+                    <div id="containerCargo" class="chart-container"><canvas id="chartCargo"></canvas></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header"><h3><i class="fas fa-exclamation-triangle"></i> Gargalos e Oportunidades (Insights)</h3></div>
+                <div class="filter-bar" style="margin-bottom: 10px; border:none; padding:0; background:transparent;">
+                    <div class="filter-group"><label>Super.:</label><select id="gargaloSuper" onchange="updateGargaloFilters('super')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Gestor:</label><select id="gargaloGestor" onchange="updateGargaloFilters('gestor')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Depto:</label><select id="gargaloDept" onchange="updateGargaloFilters('dept')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Cargo:</label><select id="gargaloCargo" onchange="updateGargaloFilters('cargo')"><option value="all">Todas</option></select></div>
+                </div>
+                <div id="gargaloInsight" class="insight-box" style="display:none;"></div>
+                <div id="containerGargalo" class="chart-container"><canvas id="chartGargalos"></canvas></div>
+            </div>
+        </div>
+
+        <div id="tab-participantes" class="tab-content">
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-user-edit"></i> Gestão de Participantes & PDI</h3></div>
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Superintendência</label><select id="fSuper" onchange="updateCascadingFilters('f', 'super')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Gestor</label><select id="fGestor" onchange="updateCascadingFilters('f', 'gestor')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Departamento</label><select id="fDept" onchange="updateCascadingFilters('f', 'dept')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Cargo</label><select id="fCargo" onchange="updateCascadingFilters('f', 'cargo')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Status Nota</label><select id="fNota" onchange="applyPartFilters()"><option value="all">Todas</option><option value="3">Crítico (< 3.0)</option><option value="4">Atenção (< 4.0)</option></select></div>
+                    <div class="filter-group"><label>Busca Rápida</label><input type="text" id="fSearch" placeholder="Nome ou Matrícula..." onkeyup="applyPartFilters()"></div>
+                    <button class="btn-reset" onclick="clearPartFilters()"><i class="fas fa-sync-alt"></i> Resetar</button>
+                    <div style="margin-left: auto; align-self: center; font-weight:bold; color:var(--primary);"><span id="resultCount">0</span> encontrados</div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table id="tablePart">
+                        <thead><tr><th width="50">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Média Final</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th>Ação</th></tr></thead>
+                        <tbody id="tbodyPart"></tbody>
+                    </table>
+                </div>
+                <div class="pagination-container"><button class="btn-page" onclick="changePage(-1)">Anterior</button><span id="pageIndicator" class="page-info">1</span><button class="btn-page" onclick="changePage(1)">Próximo</button></div>
+            </div>
+        </div>
+
+        <div id="tab-performance" class="tab-content">
+            <div class="filter-bar" style="margin-bottom:20px;">
+                <div class="filter-group"><label>Superintendência</label><select id="pSuper" onchange="updateCascadingFilters('p', 'super')"><option value="all">Todas</option></select></div>
+                <div class="filter-group"><label>Gestor</label><select id="pGestor" onchange="updateCascadingFilters('p', 'gestor')"><option value="all">Todas</option></select></div>
+                <div class="filter-group"><label>Departamento</label><select id="pDept" onchange="updateCascadingFilters('p', 'dept')"><option value="all">Todas</option></select></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header" style="justify-content:center;"><h3><i class="fas fa-layer-group"></i> Distribuição de Conceitos (1-4) por Superintendência</h3></div>
+                <div style="display:flex; justify-content:center; padding: 20px;">
+                    <div style="height: 450px; width: 95%; max-width: 1000px;"><canvas id="chartConcepts"></canvas></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                 <div class="card-header"><h3><i class="fas fa-list-ol"></i> Ranking de Colaboradores (Filtro Atual)</h3></div>
+                 <div class="chart-container" style="height: 600px;"><canvas id="chartRanking"></canvas></div>
+            </div>
+
+            <div class="chart-row" style="margin-top:20px;">
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-chart-pie"></i> Distribuição (Quartis)</h3></div>
+                    <div class="chart-container" style="height: 350px;"><canvas id="chartQuartis"></canvas></div>
+                </div>
+                <div class="card">
+                     <div class="card-header"><h3><i class="fas fa-table"></i> Ranking por Competência</h3></div>
+                     <div style="max-height: 350px; overflow-y: auto;">
+                         <table class="rank-table" id="tableCompRank">
+                             <thead><tr><th>Competência</th><th style="text-align:center;">Média Geral</th><th style="text-align:center;">Status</th></tr></thead>
+                             <tbody></tbody>
+                         </table>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-gestao" class="tab-content">
+            <div class="card">
+                <div class="filter-bar" style="border:none; box-shadow:none; padding:0; background:transparent;">
+                     <div class="filter-group"><label>Superintendência:</label><select id="gManSuper" onchange="updateCascadingFilters('gMan', 'super')"><option value="all">Todas</option></select></div>
+                     <div class="filter-group"><label>Departamento:</label><select id="gManDept" onchange="updateCascadingFilters('gMan', 'dept')"><option value="all">Todas</option></select></div>
+                     <div class="filter-group"><label>Selecione o Gestor:</label><select id="gestaoSelect" onchange="renderManagerProfile()"><option value="all">Visão Agregada</option></select></div>
+                     <button class="btn-reset" onclick="clearGestaoFilters()"><i class="fas fa-eraser"></i> Limpar</button>
+                </div>
+                <div id="gestorProfile" class="gestor-profile">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom:10px; margin-bottom:20px;">
+                        <h2 style="color: var(--primary); margin:0; display:flex; align-items:center; gap:10px;"><i class="fas fa-user-tie"></i> Análise: <span id="gestorName"></span></h2>
+                        <button onclick="downloadManagerPDF()" class="btn-action"><i class="fas fa-file-pdf"></i> Baixar Dossiê</button>
+                    </div>
+                    <div class="gestor-grid">
+                        <div>
+                            <div class="kpi-card"><div class="kpi-lbl">Liderados (Filtro)</div><div class="kpi-val" id="gestorHeadcount">0</div></div>
+                            <div style="background: #e8f5e9; padding: 20px; border-radius: 12px; margin-top: 20px; box-shadow: var(--shadow-sm);">
+                                <strong style="color: var(--success); font-size:1.1rem;"><i class="fas fa-trophy"></i> Top 3 Fortalezas</strong>
+                                <ul id="gestorTop3" style="padding-left: 20px; margin: 10px 0 0 0; line-height: 1.8;"></ul>
+                            </div>
+                            <div style="background: #fff3cd; padding: 20px; border-radius: 12px; margin-top: 20px; box-shadow: var(--shadow-sm);">
+                                <strong style="color: #856404; font-size:1.1rem;"><i class="fas fa-exclamation-circle"></i> Top 3 Oportunidades</strong>
+                                <ul id="gestorBottom3" style="padding-left: 20px; margin: 10px 0 0 0; line-height: 1.8;"></ul>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="plan-box" style="background:white; border: 1px solid #ddd; border-left: 5px solid var(--primary);">
+                                <h3 style="margin-top:0; color: var(--primary);"><i class="fas fa-rocket"></i> Plano de Ação Estruturado</h3>
+                                <div id="gestorActionPlan" style="line-height:1.6; color:#444;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-heatmap" class="tab-content">
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-th"></i> Mapa de Calor</h3></div>
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Superintendência</label><select id="hSuper" onchange="updateCascadingFilters('h', 'super')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Gestor</label><select id="hGestor" onchange="updateCascadingFilters('h', 'gestor')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Departamento</label><select id="hDept" onchange="updateCascadingFilters('h', 'dept')"><option value="all">Todas</option></select></div>
+                    <div class="filter-group"><label>Busca</label><input type="text" id="hSearch" placeholder="Nome..." onkeyup="applyHeatmapFilters()"></div>
+                    <button class="btn-reset" onclick="clearHeatFilters()"><i class="fas fa-sync-alt"></i> Limpar</button>
+                    <div style="margin-left: auto; color:var(--text-light);">Exibindo <strong id="heatCount">0</strong> registros</div>
+                </div>
+                <div style="overflow-x:auto;"><table id="tableHeat"><thead id="headHeat"></thead><tbody id="tbodyHeat"></tbody></table></div>
+                <div class="pagination-container"><button class="btn-page" onclick="changeHeatPage(-1)">Anterior</button><span id="pageIndicatorHeat" class="page-info">1</span><button class="btn-page" onclick="changeHeatPage(1)">Próximo</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DATA DICTIONARY
+    const criteriaDetails = {
+       "CONFIANÇA - VALOR": {
+           desc: "Conhecer para Confiar.",
+           behaviors: "Sinceridade com respeito, coerência (fala/faz), empatia, escuta ativa, clareza, busca por fatos, transparência e cumprimento de combinados."
+       },
+       "DESENVOLVIMENTO DE PESSOAS - VALOR": {
+           desc: "Desenvolver para Transformar.",
+           behaviors: "Promoção de autonomia, desafios, feedback constante, coerência no recrutamento e fomento ao trabalho em equipe e aprendizado mútuo."
+       },
+       "INOVAÇÃO - VALOR": {
+           desc: "Experimentar, Criar e Evoluir.",
+           behaviors: "Resiliência, ousadia, otimismo, curiosidade por tendências, simplicidade, flexibilidade e cocriação."
+       },
+       "SATISFAÇÃO DO CLIENTE - VALOR": {
+           desc: "Conhecer para Servir, Conquistar e Fidelizar.",
+           behaviors: "Experiência positiva, antecipação de necessidades, atenção aos detalhes, resolução de conflitos e atendimento empático."
+       },
+       "SENSO DE DONO - VALOR": {
+           desc: "Vestir a camisa.",
+           behaviors: "Responsabilidade financeira, visão sistêmica, decisão de valor, promoção de engajamento e exemplo pessoal."
+       },
+       "EXCELÊNCIA - VALOR": {
+           desc: "Melhorar Sempre.",
+           behaviors: "Comprometimento além do esperado, alinhamento com cliente, critérios de qualidade, priorização, capricho e eficiência no uso de recursos."
+       },
+       "CONFIAR MUTUAMENTE - COMPORTAMENTO": {
+           desc: "Exposição de opinião sem filtros e vulnerabilidade.",
+           behaviors: "Compartilhar vulnerabilidades, promover troca de ideias, pedir ajuda, transparência e coerência."
+       },
+       "ENGAJAR-SE DE MANEIRA FRANCA E ABERTA - COMPORTAMENTO": {
+           desc: "Debate aberto e desafio construtivo.",
+           behaviors: "Coragem para assuntos sensíveis, comunicação aberta para inovação e criação de ambiente seguro."
+       },
+       "COMPROMETER-SE COM AS DECISÕES TOMADAS - COMPORTAMENTO": {
+           desc: "Compromisso genuíno e alinhamento.",
+           behaviors: "Estratégias de comprometimento, revisão conjunta de decisões e correlação com objetivos da equipe."
+       },
+       "ASSUMIR RESPONSABILIDADES PELAS DECISÕES TOMADAS - COMPORTAMENTO": {
+           desc: "Disseminação e cobrança de compromisso.",
+           behaviors: "Assumir responsabilidade por resultados, definição de papéis e revisões regulares de progresso."
+       },
+       "TER ATENÇÃO AOS RESULTADOS - COMPORTAMENTO": {
+           desc: "Foco no resultado coletivo.",
+           behaviors: "Priorização do coletivo, definição de indicadores de sucesso e conexão emocional com o sucesso/fracasso da organização."
+       }
+    };
+
+    // GLOBAL STATE
+    let rawData = [], charts = {}, currentManagerData = null;
+    let filteredDataGlobal = [], filteredHeatCollaborators = [];
+    let allCriteria = new Set();
+    let currentPage = 1, heatPage = 1;
+    const itemsPerPage = 15;
+    let heatSort = { col: 'nome', ord: 'asc' }; // Inicia ordenado por Nome
+
+    // --- UPLOAD ---
+    function triggerUpload() { 
+        const name = document.getElementById('companyNameInput').value;
+        if(name) { document.getElementById('headerLogo').innerText = name; }
+        document.getElementById('csvInput').click(); 
+    }
+    
+    function handleFile(input) {
+        const file = input.files[0];
+        if(!file) return;
+        document.getElementById('btnUpload').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        Papa.parse(file, { 
+            header: false, skipEmptyLines: true, encoding: "ISO-8859-1", delimiter: "",
+            complete: function(res) { 
+                try { processData(res.data); document.getElementById('uploadScreen').style.display = 'none'; document.getElementById('mainInterface').classList.remove('hidden'); } 
+                catch(e) { alert("Erro: " + e.message); }
+            }
+        });
+    }
+
+    function forceFixEncoding(str) {
+        if (!str) return "";
+        str = String(str);
+        const map = {'Ã©':'é','Ã£':'ã','Ã¡':'á','Ã§':'ç','Ãª':'ê','Ã³':'ó','Ã´':'ô','Ãº':'ú','Ã­':'í','Ã ':'à','Ãƒ':'Ã','Ã•':'Õ','PebÃ©':'Pebé'};
+        for (let k in map) str = str.split(k).join(map[k]);
+        try { str = decodeURIComponent(escape(str)); } catch(e){}
+        return str.trim();
+    }
+    function normalize(str) { return str ? String(str).trim().toUpperCase() : ""; }
+
+    function processData(rows) {
+        if(!rows || rows.length < 2) throw new Error("Arquivo vazio");
+        const idxSuper=9, idxGestor=10, idxCrit=14, idxNota=18, idxTipo=15;
+        rows.shift();
+        const map = {};
+        
+        rows.forEach(r => {
+            if (!r || r.length < 5) return;
+            const matricula = forceFixEncoding(r[1]);
+            const nome = forceFixEncoding(r[2]);
+            if(!nome) return;
+            
+            const uid = normalize(matricula) + "_" + normalize(nome);
+            if(!map[uid]) {
+                map[uid] = {
+                    uid: uid, cpf: forceFixEncoding(r[0]), matricula: matricula, nome: nome,
+                    cargo: forceFixEncoding(r[3]), unidade: forceFixEncoding(r[7]), dept: forceFixEncoding(r[8]),
+                    superintendencia: forceFixEncoding(r[idxSuper]) || "Geral",
+                    gestor: forceFixEncoding(r[idxGestor]),
+                    criteriaScores: {}, sum: 0, count: 0, pdiIndex: 0, detailedScores: {}
+                };
+            }
+            const crit = forceFixEncoding(r[idxCrit]) || 'Geral';
+            const tipo = forceFixEncoding(r[idxTipo]).toLowerCase();
+            let val = parseFloat(String(r[idxNota]||"0").replace(',','.').replace('%',''));
+
+            if(!isNaN(val)) {
+                map[uid].criteriaScores[crit] = val;
+                map[uid].sum += val; map[uid].count++;
+                if(!map[uid].detailedScores[crit]) map[uid].detailedScores[crit] = { final:0, self:0, manager:0 };
+                if(tipo.includes('auto')) map[uid].detailedScores[crit].self = val;
+                else { map[uid].detailedScores[crit].manager = val; map[uid].detailedScores[crit].final = val; }
+                allCriteria.add(crit);
+            }
+        });
+
+        rawData = Object.values(map).map(e => {
+            e.avg = e.count > 0 ? (e.sum / e.count) : 0;
+            e.scores = Object.entries(e.criteriaScores).map(([k,v]) => ({crit:k, nota:v})).sort((a,b) => a.nota - b.nota);
+            return e;
+        });
+
+        filteredDataGlobal = [...rawData];
+        initDashboard();
+    }
+
+    function initDashboard() {
+        ['g','f','p','h','gMan'].forEach(p => populateInitialFilters(p));
+        updateGlobalFilters();
+        applyPartFilters();
+        updatePerformanceFilters();
+        const gSel = document.getElementById('gestaoSelect');
+        if(gSel && gSel.options.length > 1) { gSel.selectedIndex = 1; renderManagerProfile(); }
+        applyHeatmapFilters();
+    }
+
+    function populateInitialFilters(prefix) {
+        const uSuper = [...new Set(rawData.map(d=>d.superintendencia))].sort();
+        fillSelect(prefix+'Super', uSuper);
+        const uGestor = [...new Set(rawData.map(d=>d.gestor))].filter(g=>g).sort();
+        const uDept = [...new Set(rawData.map(d=>d.dept))].sort();
+        
+        let idGestor = prefix+'Gestor'; if(prefix==='gMan') idGestor='gestaoSelect';
+        let idDept = prefix+'Dept'; if(prefix==='gMan') idDept='gManDept';
+        
+        fillSelect(idGestor, uGestor);
+        fillSelect(idDept, uDept);
+        if(prefix==='f') fillSelect('fCargo', [...new Set(rawData.map(d=>d.cargo))].sort());
+        if(prefix==='g') { fillSelect('gargaloSuper', uSuper); fillSelect('gargaloGestor', uGestor); fillSelect('gargaloDept', uDept); fillSelect('gargaloCargo', [...new Set(rawData.map(d=>d.cargo))].sort()); }
+    }
+
+    function fillSelect(id, list) {
+        const sel = document.getElementById(id); 
+        if(!sel) return;
+        sel.innerHTML = '<option value="all">Todas/Selecione</option>';
+        list.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`);
+    }
+
+    // Cascade: Super -> Gestor -> Dept -> Cargo
+    function updateCascadingFilters(prefix, source) {
+        let idSuper = prefix+'Super';
+        let idGestor = prefix+'Gestor'; if(prefix==='gMan') idGestor='gestaoSelect';
+        let idDept = prefix+'Dept'; if(prefix==='gMan') idDept='gManDept';
+        let idCargo = prefix+'Cargo';
+
+        const vSuper = document.getElementById(idSuper) ? document.getElementById(idSuper).value : 'all';
+        const vGestor = document.getElementById(idGestor) ? document.getElementById(idGestor).value : 'all';
+        const vDept = document.getElementById(idDept) ? document.getElementById(idDept).value : 'all';
+
+        let subset = rawData;
+        
+        if (source === 'super') {
+            if(vSuper !== 'all') subset = rawData.filter(d => d.superintendencia === vSuper);
+            const avGestors = [...new Set(subset.map(d => d.gestor))].filter(g=>g).sort();
+            fillSelect(idGestor, avGestors);
+            document.getElementById(idGestor).value = 'all';
+            
+            const avDepts = [...new Set(subset.map(d => d.dept))].sort();
+            fillSelect(idDept, avDepts);
+            document.getElementById(idDept).value = 'all';
+            
+            if(prefix === 'f') {
+                 const avCargos = [...new Set(subset.map(d=>d.cargo))].sort();
+                 fillSelect(idCargo, avCargos);
+            }
+        }
+        else if (source === 'gestor') {
+            if(vSuper !== 'all') subset = subset.filter(d => d.superintendencia === vSuper);
+            if(vGestor !== 'all') subset = subset.filter(d => d.gestor === vGestor);
+            const avDepts = [...new Set(subset.map(d => d.dept))].sort();
+            fillSelect(idDept, avDepts);
+            document.getElementById(idDept).value = 'all';
+            
+            if(prefix === 'f') {
+                 const avCargos = [...new Set(subset.map(d=>d.cargo))].sort();
+                 fillSelect(idCargo, avCargos);
+             }
+        }
+        else if (source === 'dept' && prefix === 'f') {
+            if(vSuper !== 'all') subset = subset.filter(d => d.superintendencia === vSuper);
+            if(vGestor !== 'all') subset = subset.filter(d => d.gestor === vGestor);
+            if(vDept !== 'all') subset = subset.filter(d => d.dept === vDept);
+            const avCargos = [...new Set(subset.map(d=>d.cargo))].sort();
+            fillSelect(idCargo, avCargos);
+        }
+
+        if(prefix==='g') updateGlobalFilters();
+        if(prefix==='f') applyPartFilters();
+        if(prefix==='p') updatePerformanceFilters();
+        if(prefix==='gMan') updateGestaoFilters(source);
+        if(prefix==='h') applyHeatmapFilters();
+    }
+
+    // --- TAB 1 ---
+    function updateGlobalFilters() {
+        const s = document.getElementById('gSuper').value;
+        const g = document.getElementById('gGestor').value;
+        const d = document.getElementById('gDept').value;
+        const data = rawData.filter(i => (s==='all'||i.superintendencia===s) && (g==='all'||i.gestor===g) && (d==='all'||i.dept===d));
+        
+        const safeSet = (list) => new Set(list).size;
+        document.getElementById('cntCargos').innerText = safeSet(data.map(i=>i.cargo));
+        document.getElementById('cntDept').innerText = safeSet(data.map(i=>i.dept));
+        if(document.getElementById('cntSuper')) document.getElementById('cntSuper').innerText = safeSet(data.map(i=>i.superintendencia));
+        document.getElementById('cntGestores').innerText = safeSet(data.map(i=>i.gestor));
+        
+        document.getElementById('kpiTotal').innerText = data.length;
+        const avgTotal = data.reduce((a,b)=>a+b.avg,0)/(data.length||1);
+        document.getElementById('kpiMedia').innerText = avgTotal.toFixed(2);
+        document.getElementById('kpiGaps').innerText = data.filter(i=>i.avg<3).length;
+        
+        const critMap = {}; data.forEach(i=>i.scores.forEach(s=>{if(!critMap[s.crit])critMap[s.crit]={s:0,c:0};critMap[s.crit].s+=s.nota;critMap[s.crit].c++}));
+        const sortedDesc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>b.v-a.v);
+        
+        if(sortedDesc.length){
+            document.getElementById('kpiBestComp').innerText = `${sortedDesc[0].k} (${sortedDesc[0].v.toFixed(2)})`;
+            document.getElementById('kpiWorstComp').innerText = `${sortedDesc[sortedDesc.length-1].k} (${sortedDesc[sortedDesc.length-1].v.toFixed(2)})`;
+        }
+
+        const gd = groupBy(rawData,'dept'); createChart('chartDept', 'line', gd.l, gd.v, '#00849C');
+        const gc = groupBy(rawData,'cargo'); createChart('chartCargo', 'line', gc.l, gc.v, '#F39C12');
+        const gs = groupBy(rawData,'superintendencia'); createChart('chartSuper', 'line', gs.l, gs.v, '#27AE60');
+        
+        updateGargaloFilters();
+    }
+    
+    function updateGargaloFilters(source) {
+        const s = document.getElementById('gargaloSuper').value;
+        const g = document.getElementById('gargaloGestor').value;
+        const d = document.getElementById('gargaloDept').value;
+        const c = document.getElementById('gargaloCargo').value;
+
+        // Cascade logic for Gargalos block
+        let sub = rawData;
+        if(source === 'super') {
+             if(s!=='all') sub = rawData.filter(d=>d.superintendencia===s);
+             fillSelect('gargaloGestor', [...new Set(sub.map(d=>d.gestor))].sort());
+             document.getElementById('gargaloGestor').value = 'all';
+             fillSelect('gargaloDept', [...new Set(sub.map(d=>d.dept))].sort());
+             document.getElementById('gargaloDept').value = 'all';
+             fillSelect('gargaloCargo', [...new Set(sub.map(d=>d.cargo))].sort());
+             document.getElementById('gargaloCargo').value = 'all';
+        } 
+        if (source === 'gestor') {
+             if(s!=='all') sub = sub.filter(d=>d.superintendencia===s);
+             if(g!=='all') sub = sub.filter(d=>d.gestor===g);
+             fillSelect('gargaloDept', [...new Set(sub.map(d=>d.dept))].sort());
+             document.getElementById('gargaloDept').value = 'all';
+             fillSelect('gargaloCargo', [...new Set(sub.map(d=>d.cargo))].sort());
+             document.getElementById('gargaloCargo').value = 'all';
+        }
+        if (source === 'dept') {
+             if(g!=='all') sub = sub.filter(d=>d.gestor===g);
+             if(d!=='all') sub = sub.filter(d=>d.dept===d);
+             fillSelect('gargaloCargo', [...new Set(sub.map(d=>d.cargo))].sort());
+             document.getElementById('gargaloCargo').value = 'all';
+        }
+
+        const data = rawData.filter(i => (s==='all'||i.superintendencia===s) && (g==='all'||i.gestor===g) && (d==='all'||i.dept===d) && (c==='all'||i.cargo===c));
+        const critMap = {}; data.forEach(i=>i.scores.forEach(sc=>{if(!critMap[sc.crit])critMap[sc.crit]={s:0,c:0};critMap[sc.crit].s+=sc.nota;critMap[sc.crit].c++}));
+        const sortedAsc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>a.v-b.v);
+        
+        if(document.getElementById('gargaloInsight')) {
+             let html = "Sem dados suficientes.";
+             if(sortedAsc.length > 0) {
+                 const worst = sortedAsc[0];
+                 const best = sortedAsc[sortedAsc.length-1];
+                 const opp = sortedAsc[Math.floor((sortedAsc.length-1)/2)];
+                 
+                 const wDet = criteriaDetails[worst.k.toUpperCase()] || {desc: "Competência Crítica", behaviors: "Melhorar desempenho."};
+                 const bDet = criteriaDetails[best.k.toUpperCase()] || {desc: "Ponto Forte", behaviors: "Manter excelência."};
+
+                 html = `<ul style="text-align:left; margin:0; padding-left:15px;">
+                    <li style="color:#C0392B; margin-bottom:8px;">
+                        <strong>🚨 Ponto de Atenção: ${worst.k} (${worst.v.toFixed(2)})</strong><br>
+                        <small><em>${wDet.desc}</em> Foco: ${wDet.behaviors}</small>
+                        <br><small style="color:#333;"><strong>Ação recomendada:</strong> Implementar programa de mentoria focado em ${worst.k.toLowerCase()} para elevar o padrão médio.</small>
+                    </li>
+                    <li style="color:#F39C12; margin-bottom:8px;"><strong>⚠️ Oportunidade:</strong> ${opp.k} (${opp.v.toFixed(2)})</li>
+                    <li style="color:#27AE60;">
+                        <strong>⭐ Destaque: ${best.k} (${best.v.toFixed(2)})</strong><br>
+                        <small>Referência em: ${bDet.desc}</small>
+                    </li>
+                 </ul>`;
+             }
+             document.getElementById('gargaloInsight').innerHTML = html;
+             document.getElementById('gargaloInsight').style.display='block';
+        }
+        createChart('chartGargalos', 'line', sortedAsc.map(x=>x.k), sortedAsc.map(x=>x.v), '#E74C3C');
+    }
+
+    // --- TAB 2 ---
+    function applyPartFilters() {
+        const s = document.getElementById('fSuper').value;
+        const g = document.getElementById('fGestor').value;
+        const d = document.getElementById('fDept').value;
+        const c = document.getElementById('fCargo').value;
+        const txt = document.getElementById('fSearch').value.toLowerCase();
+        const n = document.getElementById('fNota').value;
+        
+        filteredDataGlobal = rawData.filter(i => 
+            (s==='all'||i.superintendencia===s) && (g==='all'||i.gestor===g) && (d==='all'||i.dept===d) && (c==='all'||i.cargo===c) &&
+            (n==='all' || (n==='3' && i.avg<3) || (n==='4' && i.avg<4)) &&
+            (i.nome.toLowerCase().includes(txt) || i.matricula.toLowerCase().includes(txt))
+        );
+        currentPage=1; renderTable();
+    }
+    
+    function renderTable() {
+        const start = (currentPage-1)*itemsPerPage;
+        const data = filteredDataGlobal.slice(start, start+itemsPerPage);
+        document.getElementById('resultCount').innerText = filteredDataGlobal.length;
+        document.getElementById('pageIndicator').innerText = currentPage;
+        
+        const tbody = document.getElementById('tbodyPart');
+        tbody.innerHTML = '';
+        data.forEach((p, idx) => {
+             const focus = p.avg >= 4 ? p.scores[p.scores.length-1] : p.scores[0];
+             const pdi = generatePDI(focus.crit, focus.nota, p.avg>=4, p.gestor);
+             const tr = `<tr><td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td><td><strong>${p.nome}</strong><br><small>${p.cargo}</small></td><td>${p.gestor}<br><small>${p.dept}</small></td><td><span class="badge ${p.avg<3?'bg-red':'bg-green'}">${p.avg.toFixed(2)}</span></td><td>${pdi}</td><td><button class="btn-action" onclick="downloadParticipantPDF('${p.uid}')"><i class="fas fa-file-pdf"></i> Dossiê</button></td></tr><tr id="row-${idx}" class="row-detail"><td colspan="6" style="padding:20px;"><div class="detail-flex"><div class="detail-table"><h4>Detalhamento de Notas</h4><table>${p.scores.map(s=>`<tr><td style="border-bottom:1px solid #eee;padding:5px;">${s.crit}</td><td style="border-bottom:1px solid #eee;padding:5px;font-weight:bold;">${s.nota.toFixed(2)}</td></tr>`).join('')}</table></div><div class="detail-charts" style="width:100%"><div class="detail-chart-box"><h5>Comparativo (Auto vs Gestor)</h5><div class="radar-wrapper"><div class="radar-container"><canvas id="rad-${idx}"></canvas></div></div></div></div></div></td></tr>`;
+             tbody.innerHTML += tr;
+             setTimeout(() => {
+                 new Chart(document.getElementById(`rad-${idx}`), {
+                     type: 'radar',
+                     data: { labels: Object.keys(p.detailedScores), datasets: [{label:'Auto', data:Object.values(p.detailedScores).map(x=>x.self), borderColor:'#F39C12', backgroundColor:'transparent'}, {label:'Gestor', data:Object.values(p.detailedScores).map(x=>x.manager), borderColor:'#00849C', backgroundColor:'rgba(0,132,156,0.1)'}] },
+                     options: { layout: { padding: 20 }, scales: {r:{min:0, max:4}} }
+                 });
+             }, 100);
+        });
+    }
+    
+    function generatePDI(crit, nota, isHigh, gestor) {
+        const det = criteriaDetails[crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhorar desempenho geral."};
+        if(isHigh) {
+            return `<div style="background:#E8F5E9; padding:12px; border-radius:8px; font-size:0.85rem;">
+            <strong>🚀 Expansão: ${crit}</strong> (${det.desc})
+            <ul style="margin:5px 0 5px 15px;">
+                <li><strong>70%:</strong> Ser mentor no comportamento: "${det.behaviors.substring(0, 50)}..."</li>
+                <li><strong>20%:</strong> Trocar práticas com lideranças.</li>
+                <li><strong>10%:</strong> Certificação avançada.</li>
+            </ul>
+            <strong>🎯 SMART:</strong> "Formar 2 sucessores em ${crit} até o Q4."</div>`;
+        } else {
+            return `<div style="background:#FFF3E0; padding:12px; border-radius:8px; font-size:0.85rem;">
+            <strong>🛠️ Recuperação: ${crit}</strong> (${det.desc})
+            <ul style="margin:5px 0 5px 15px;">
+                <li><strong>70%:</strong> Realizar tarefas monitoradas focadas em ${crit}, registrando evoluções diárias.</li>
+                <li><strong>20%:</strong> Sessões de role-play ou feedback reverso com ${gestor} focadas em bloqueios específicos.</li>
+                <li><strong>10%:</strong> Análise crítica de cases de sucesso na empresa sobre ${crit}.</li>
+            </ul>
+            <strong>🎯 SMART:</strong> "Subir nota para 3.5 em ${crit} no próximo ciclo."</div>`;
+        }
+    }
+
+    function downloadParticipantPDF(uid) {
+        const p = rawData.find(x => x.uid === uid);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(18); doc.setTextColor(15, 76, 117); doc.text(`Dossiê de Performance: ${p.nome}`, 14, 20);
+        doc.setFontSize(11); doc.setTextColor(50); doc.text(`Cargo: ${p.cargo} | Dept: ${p.dept} | Gestor: ${p.gestor}`, 14, 30);
+        doc.text(`Média Final: ${p.avg.toFixed(2)}`, 14, 38);
+        doc.autoTable({ startY: 45, head: [['Competência', 'Nota']], body: p.scores.map(s => [s.crit, s.nota.toFixed(2)]), theme: 'striped', headStyles: { fillColor: [15, 76, 117] } });
+        let finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(14); doc.setTextColor(15, 76, 117); doc.text("Plano de Desenvolvimento Individual (PDI)", 14, finalY);
+        
+        const focus = p.avg >= 4 ? p.scores[p.scores.length-1] : p.scores[0];
+        const isHigh = p.avg >= 4;
+        const det = criteriaDetails[focus.crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhoria contínua."};
+        
+        const pdiText = isHigh 
+            ? `Foco: Expansão em ${focus.crit}.\nConceito: ${det.desc}\n\nAção Prática: Disseminar o comportamento "${det.behaviors}".\n\nMeta SMART: "Aumentar eficiência da área em 10% através de ${focus.crit} em 6 meses."`
+            : `Foco: Recuperação em ${focus.crit}.\nConceito: ${det.desc}\n\nAção Prática: Realizar tarefas monitoradas focadas em ${focus.crit}, registrando evoluções diárias.\n\nMeta SMART: "Eliminar erros em ${focus.crit} e atingir nota 3.5 no próximo ciclo."`;
+            
+        doc.setFontSize(11); doc.setTextColor(0);
+        const splitText = doc.splitTextToSize(pdiText, 180);
+        doc.text(splitText, 14, finalY + 10);
+        
+        doc.save(`Dossie_${p.nome}.pdf`);
+    }
+
+    // --- TAB 3 ---
+    function updatePerformanceFilters() {
+        const s = document.getElementById('pSuper').value;
+        const d = document.getElementById('pDept').value;
+        const g = document.getElementById('pGestor').value;
+        const sub = rawData.filter(i => (s==='all'||i.superintendencia===s) && (d==='all'||i.dept===d) && (g==='all'||i.gestor===g));
+        
+        const conc = {}; sub.forEach(i => { const k=i.superintendencia; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<1.5)conc[k][0]++; else if(i.avg<2.5)conc[k][1]++; else if(i.avg<3.5)conc[k][2]++; else conc[k][3]++; });
+        const lbls = Object.keys(conc);
+        if(charts.concepts) charts.concepts.destroy();
+        charts.concepts = new Chart(document.getElementById('chartConcepts'), {
+            type:'bar', data: { labels:lbls, datasets:[{label:'1-Muito Abaixo', data:lbls.map(k=>conc[k][0]), backgroundColor:'#C0392B'}, {label:'2-Abaixo', data:lbls.map(k=>conc[k][1]), backgroundColor:'#E74C3C'}, {label:'3-Atende', data:lbls.map(k=>conc[k][2]), backgroundColor:'#3498DB'}, {label:'4-Acima', data:lbls.map(k=>conc[k][3]), backgroundColor:'#27AE60'}] }, options: {maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true}}} 
+        });
+
+        const ranked = [...sub].sort((a,b)=>b.avg-a.avg);
+        if(charts.rank) charts.rank.destroy();
+        charts.rank = new Chart(document.getElementById('chartRanking'), {
+            type:'bar', data:{labels:ranked.map(r=>r.nome), datasets:[{label:'Nota', data:ranked.map(r=>r.avg.toFixed(2)), backgroundColor:'#00849C'}]}, options:{maintainAspectRatio:false, indexAxis:'y', scales:{x:{max:4}}}
+        });
+
+        let q1=0,q2=0,q3=0,q4=0;
+        sub.forEach(x => { if(x.avg<2.5)q1++; else if(x.avg<3.5)q2++; else if(x.avg<4.5)q3++; else q4++; });
+        createChart('chartQuartis', 'bar', ['Q1','Q2','Q3','Q4'], [q1,q2,q3,q4], ['#E74C3C','#F39C12','#3498DB','#27AE60']);
+
+        const compMap = {}; sub.forEach(p=>p.scores.forEach(s=>{ if(!compMap[s.crit]) compMap[s.crit]={s:0,c:0}; compMap[s.crit].s+=s.nota; compMap[s.crit].c++; }));
+        const listComp = Object.entries(compMap).map(([k,v])=>({k, v:v.s/v.c})).sort((a,b)=>b.v-a.v);
+        document.getElementById('tableCompRank').getElementsByTagName('tbody')[0].innerHTML = listComp.map(r=>`<tr><td>${r.k}</td><td style="text-align:center;">${r.v.toFixed(2)}</td><td style="text-align:center;">${r.v<3?'🔴':(r.v<4?'🟡':'🟢')}</td></tr>`).join('');
+    }
+
+    // --- TAB 4 GESTAO ---
+    function updateGestaoFilters(source) {
+        const s = document.getElementById('gManSuper').value;
+        const d = document.getElementById('gManDept').value;
+        const g = document.getElementById('gestaoSelect').value;
+        
+        let subset = rawData.filter(i => (s==='all'||i.superintendencia===s) && (d==='all'||i.dept===d));
+        
+        if(source !== 'gestor') {
+             const gestores = [...new Set(subset.map(d=>d.gestor))].filter(g=>g&&g!=='N/A').sort();
+             const sel = document.getElementById('gestaoSelect');
+             const cur = sel.value;
+             sel.innerHTML = '<option value="all">Visão Agregada</option>';
+             gestores.forEach(g => sel.innerHTML += `<option value="${g}">${g}</option>`);
+             if(gestores.includes(cur)) sel.value = cur;
+        }
+        renderManagerProfile();
+    }
+    
+    function renderManagerProfile() {
+        const g = document.getElementById('gestaoSelect').value;
+        const s = document.getElementById('gManSuper').value;
+        const d = document.getElementById('gManDept').value;
+        document.getElementById('gestorProfile').style.display='block';
+        document.getElementById('gestorName').innerText = (g !== 'all') ? g : "Visão Agregada";
+        
+        const team = rawData.filter(i=> (g==='all'||i.gestor===g) && (s==='all'||i.superintendencia===s) && (d==='all'||i.dept===d));
+        document.getElementById('gestorHeadcount').innerText = team.length;
+        
+        const crit = {}; team.forEach(t=>t.scores.forEach(sc=>{if(!crit[sc.crit])crit[sc.crit]={s:0,c:0};crit[sc.crit].s+=sc.nota;crit[sc.crit].c++}));
+        const list = Object.entries(crit).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>b.v-a.v);
+        
+        if(list.length > 0) {
+            document.getElementById('gestorTop3').innerHTML = list.slice(0,3).map(x=>`<li>${x.k} (${x.v.toFixed(2)})</li>`).join('');
+            document.getElementById('gestorBottom3').innerHTML = list.slice(-3).reverse().map(x=>`<li>${x.k} (${x.v.toFixed(2)})</li>`).join('');
+            
+            const gap = list[list.length-1];
+            const det = criteriaDetails[gap.k.toUpperCase()] || {desc: "Foco em resultados", behaviors: "Melhorar entrega."};
+            
+            document.getElementById('gestorActionPlan').innerHTML = `
+                <strong>PDCA (Foco: ${gap.k})</strong>
+                <ul style="font-size:0.9rem;">
+                    <li><strong>Plan:</strong> Mapear quais comportamentos específicos de ${gap.k} estão ausentes (ex: "${det.behaviors.substring(0,30)}...") e impactando o resultado.</li>
+                    <li><strong>Do:</strong> Conduzir workshop prático de alinhamento de expectativas e treinamento on-the-job.</li>
+                    <li><strong>Check:</strong> Instituir 'Checkpoint de ${gap.k}' nas reuniões semanais para medir avanços.</li>
+                    <li><strong>Act:</strong> Reconhecer publicamente avanços ou iniciar plano de recuperação individual se necessário.</li>
+                </ul>
+                <div style="margin-top:10px; background:#e3f2fd; padding:10px; border-radius:8px;"><strong>🎯 SMART:</strong> "Elevar média em ${gap.k} para 3.8 até o fim do ciclo."</div>
+            `;
+            currentManagerData = { name: (g!=='all'?g:'Visão Agregada'), teamSize: team.length, top3: list.slice(0,3), bottom3: list.slice(-3) };
+        }
+    }
+
+    function clearGestaoFilters() { document.getElementById('gManSuper').value = 'all'; updateCascadingFilters('gMan', 'super'); }
+    function downloadManagerPDF() {
+        if(!currentManagerData) return;
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.setFontSize(20); doc.setTextColor(15, 76, 117); doc.text(`Dossiê de Gestão: ${currentManagerData.name}`, 14, 20);
+        doc.setFontSize(12); doc.setTextColor(50); doc.text(`Total Liderados: ${currentManagerData.teamSize}`, 14, 30);
+        doc.autoTable({ startY: 40, head: [['Top 3 Fortalezas', 'Média']], body: currentManagerData.top3.map(x => [x.k, x.v.toFixed(2)]), theme: 'grid', headStyles: { fillColor: [40, 167, 69] } });
+        doc.autoTable({ startY: doc.lastAutoTable.finalY + 10, head: [['Top 3 Gaps', 'Média']], body: currentManagerData.bottom3.map(x => [x.k, x.v.toFixed(2)]), theme: 'grid', headStyles: { fillColor: [220, 53, 69] } });
+        let y = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(14); doc.setTextColor(15, 76, 117); doc.text("Plano de Ação Sugerido", 14, y);
+        doc.setFontSize(11); doc.setTextColor(0);
+        const gap = currentManagerData.bottom3[currentManagerData.bottom3.length-1];
+        doc.text(`Foco Principal: ${gap.k}\n\n1. Plan: Investigar causas.\n2. Do: Treinamento prático.\n3. Check: Monitorar.\n4. Act: Ajustar.\n\nMeta SMART: Elevar ${gap.k} para 3.8.`, 14, y + 10);
+        doc.save(`Gestao_${currentManagerData.name}.pdf`);
+    }
+
+    // --- TAB 5 ---
+    function applyHeatmapFilters() {
+         const s = document.getElementById('hSuper').value;
+         const g = document.getElementById('hGestor').value;
+         const d = document.getElementById('hDept').value;
+         const txt = document.getElementById('hSearch').value.toLowerCase();
+         filteredHeatCollaborators = rawData.filter(i => 
+            (s==='all'||i.superintendencia===s) && 
+            (g==='all'||i.gestor===g) && 
+            (d==='all'||i.dept===d) && 
+            i.nome.toLowerCase().includes(txt)
+         );
+         renderHeatmap();
+    }
+    
+    function clearHeatFilters() { document.getElementById('hSuper').value = 'all'; updateCascadingFilters('h', 'super'); document.getElementById('hSearch').value = ''; }
+
+    function sortHeatmap(col) {
+        if(heatSort.col === col) { heatSort.ord = (heatSort.ord === 'asc') ? 'desc' : 'asc'; } else { heatSort.col = col; heatSort.ord = 'asc'; }
+        renderHeatmap();
+    }
+
+    function renderHeatmap() {
+        filteredHeatCollaborators.sort((a,b) => {
+            let valA = (heatSort.col === 'avg') ? a.avg : (a.criteriaScores[heatSort.col] || 0);
+            let valB = (heatSort.col === 'avg') ? b.avg : (b.criteriaScores[heatSort.col] || 0);
+            if(heatSort.col === 'nome') { valA = a.nome; valB = b.nome; return (heatSort.ord === 'asc') ? valA.localeCompare(valB) : valB.localeCompare(valA); }
+            return (heatSort.ord === 'asc') ? valA - valB : valB - valA;
+        });
+
+        const totalPages = Math.ceil(filteredHeatCollaborators.length / itemsPerPage) || 1;
+        if(heatPage > totalPages) heatPage = 1;
+        
+        const start = (heatPage-1)*itemsPerPage;
+        const d = filteredHeatCollaborators.slice(start, start+itemsPerPage);
+        
+        const h = document.getElementById('headHeat');
+        const b = document.getElementById('tbodyHeat');
+        const crits = Array.from(allCriteria).sort();
+        
+        h.innerHTML = `<tr>
+            <th class="col-fixed" onclick="sortHeatmap('nome')">Nome ${heatSort.col==='nome'?'⇅':''}</th>
+            <th onclick="sortHeatmap('avg')">Média ${heatSort.col==='avg'?'⇅':''}</th>
+            ${crits.map(c=>`<th onclick="sortHeatmap('${c}')">${c} ${heatSort.col===c?'⇅':''}</th>`).join('')}
+        </tr>`;
+        
+        b.innerHTML = '';
+        d.forEach(p => {
+            let cells = crits.map(c => {
+                const val = p.criteriaScores[c];
+                const cls = val<3?'heat-red':(val<4?'heat-yellow':'heat-green');
+                return `<td style="text-align:center"><span class="heat-cell ${cls}">${val?val.toFixed(2):'-'}</span></td>`;
+            }).join('');
+            b.innerHTML += `<tr><td class="col-fixed">${p.nome}</td><td>${p.avg.toFixed(2)}</td>${cells}</tr>`;
+        });
+        document.getElementById('heatCount').innerText = filteredHeatCollaborators.length;
+        document.getElementById('pageIndicatorHeat').innerText = heatPage;
+    }
+    
+    function changeHeatPage(d) {
+        const total = Math.ceil(filteredHeatCollaborators.length / itemsPerPage) || 1;
+        heatPage += d;
+        if(heatPage < 1) heatPage = 1;
+        if(heatPage > total) heatPage = total;
+        renderHeatmap();
+    }
+    
+    function changePage(d) { currentPage+=d; renderTable(); }
+
+    // --- HELPERS ---
+    function groupBy(data, key) {
+        const m = {}; data.forEach(i=>{if(!m[i[key]])m[i[key]]={s:0,c:0};m[i[key]].s+=i.avg;m[i[key]].c++});
+        const s = Object.entries(m).sort((a,b)=>(b[1].s/b[1].c)-(a[1].s/a[1].c));
+        return { l: s.map(x=>x[0]), v: s.map(x=>(x[1].s/x[1].c).toFixed(2)) };
+    }
+    
+    function createChart(id, type, l, v, color, opts={}) {
+        if(charts[id]) charts[id].destroy();
+        const ctx = document.getElementById(id);
+        if(!ctx) return;
+        charts[id] = new Chart(ctx, {
+            type: type, data: { labels:l, datasets:[{label:'Média', data:v, borderColor:color, backgroundColor:color}] },
+            options: { indexAxis: opts.indexAxis||'x', maintainAspectRatio: false, responsive: true }
+        });
+    }
+
+    function toggleDetails(id) { const el=document.getElementById(id); el.style.display=el.style.display==='table-row'?'none':'table-row'; }
+    function clearGlobalFilters() { document.getElementById('gSuper').value = 'all'; updateCascadingFilters('g', 'super'); }
+    function clearPartFilters() { document.getElementById('fSuper').value = 'all'; updateCascadingFilters('f', 'super'); }
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+        document.getElementById('tab-'+id).classList.add('active');
+        event.target.classList.add('active');
+    }
+</script>
+</body>
+</html>
