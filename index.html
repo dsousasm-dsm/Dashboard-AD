@@ -121,18 +121,6 @@
         .detail-table { flex: 1; min-width: 350px; border: 1px solid #eee; border-radius: 12px; padding: 15px; background: white; box-shadow: var(--shadow-sm); }
         .detail-charts { flex: 1; min-width: 350px; display: flex; gap: 15px; }
         .detail-chart-box { flex: 1; background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; }
-
-        #tableHeat th:not(.col-fixed) { max-width: 70px; font-size: 0.7rem; vertical-align: bottom; white-space: normal; }
-        .heat-cell { display: block; border-radius: 4px; color: white; font-weight: bold; padding: 4px 0; font-size: 0.75rem; }
-        .heat-red { background: var(--danger); }
-        .heat-yellow { background: var(--warning); color: #333; }
-        .heat-green { background: var(--success); }
-        .col-fixed { position: sticky; left: 0; background: #fff; z-index: 10; border-right: 2px solid #eee; min-width: 120px; max-width: 150px; }
-        
-        .data-table-container { margin-top: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
-        .draft-alert { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffeeba; }
-        .draft-alert h4 { margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; }
-        .draft-list { margin-top: 10px; display: none; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 6px; }
         
         .kpi-clickable { cursor: pointer; transition: 0.2s; }
         .kpi-clickable:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
@@ -141,6 +129,15 @@
         .scale-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 10px; background: #fff; border-radius: 6px; border: 1px solid #eee; align-items: center; }
         .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 600; color: #555; margin-right: 10px; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+        /* DATA TABLE SCROLL */
+        .data-table-container { margin-top: 10px; max-height: 420px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; width: 100%; }
+        .data-table-container table { width: 100%; }
+        .data-table-container th { position: sticky; top: 0; z-index: 1; background: #f1f3f5; }
+        
+        .draft-alert { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffeeba; }
+        .draft-alert h4 { margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; }
+        .draft-list { margin-top: 10px; display: none; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 6px; }
 
         @media(max-width: 1000px){ .chart-row { grid-template-columns: 1fr; } .info-grid { grid-template-columns: 1fr 1fr; } .detail-charts { flex-direction: column; } .header-controls { justify-content: flex-start; margin-top: 10px; } }
         .hidden { display: none !important; }
@@ -178,10 +175,10 @@
 
         <label style="display:block; text-align:left; color:#666; font-weight:700; margin-bottom:5px;">Qual a nota máxima da escala?</label>
         <select id="scaleInput" class="company-input" style="background:#f8f9fa;">
+            <option value="4" selected>4 (Padrão)</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
-            <option value="4" selected>4 (Padrão)</option>
             <option value="5">5</option>
             <option value="6">6</option>
             <option value="7">7</option>
@@ -230,7 +227,6 @@
         <button class="nav-btn" onclick="switchTab('participantes')"><i class="fas fa-users"></i> Participantes & PDI</button>
         <button class="nav-btn" onclick="switchTab('performance')"><i class="fas fa-chart-bar"></i> Indicadores & Performance</button>
         <button class="nav-btn" onclick="switchTab('gestao')"><i class="fas fa-briefcase"></i> Indicadores de Gestão</button>
-        <button class="nav-btn" onclick="switchTab('heatmap')"><i class="fas fa-th"></i> Mapa de Calor</button>
     </nav>
     
     <div class="container">
@@ -247,15 +243,21 @@
 
             <div class="kpi-grid">
                 <div class="kpi-card"><div class="kpi-lbl">Total Participantes (Concluídos)</div><div class="kpi-val" id="kpiTotal">0 🧑‍🤝‍🧑</div></div>
-                <div class="kpi-card"><div class="kpi-lbl">Média Geral</div><div class="kpi-val" id="kpiMedia">0.0 📊</div></div>
-                
-                <div class="kpi-card kpi-clickable" style="border-left-color: var(--danger);" onclick="goToAttentionList()" title="São colaboradores com média menor que 50% da escala">
-                    <div class="kpi-lbl">Colaboradores em Atenção <i class="fas fa-mouse-pointer" style="font-size:0.7em;"></i></div>
-                    <div class="kpi-val" id="kpiGaps">0 ⚠️</div>
-                </div>
+                <div class="kpi-card"><div class="kpi-lbl">Média Global de Competências</div><div class="kpi-val" id="kpiMedia">0.0 📊</div></div>
                 
                 <div class="kpi-card" style="border-left-color: var(--success);"><div class="kpi-lbl">Melhor Competência</div><div class="kpi-val" id="kpiBestComp">- 🏆</div></div>
                 <div class="kpi-card" style="border-left-color: var(--warning);"><div class="kpi-lbl">Menor Competência</div><div class="kpi-val" id="kpiWorstComp">- 📉</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> Distribuição Percentual de Colaboradores</h3>
+                </div>
+                <p class="chart-explanation">Este gráfico representa a categorização dos colaboradores baseada na <strong>Média GERAL (Autoavaliação + Gestor)</strong>, seguindo a régua da empresa.</p>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="chartDistributionGeral"></canvas>
+                </div>
+                <div id="distLabels" style="display:flex; justify-content:center; gap:20px; margin-top:10px; font-size:0.9rem; font-weight:600;"></div>
             </div>
 
             <div class="chart-row-vertical" style="margin-top:20px;">
@@ -303,6 +305,7 @@
                 </div>
                 
                 <div id="scaleLegendPart" class="scale-legend"></div>
+                <div style="font-size:0.8rem; color:#666; margin-left:15px; margin-bottom:15px; font-style:italic;">Nota: A média considera apenas a avaliação do Gestor (100% peso).</div>
 
                 <div style="overflow-x:auto;">
                     <table id="tablePart">
@@ -377,25 +380,11 @@
             </div>
         </div>
 
-        <div id="tab-heatmap" class="tab-content">
-            <div class="card">
-                <div class="card-header"><h3><i class="fas fa-th"></i> Mapa de Calor</h3></div>
-                <div class="filter-bar no-print">
-                    <div class="filter-group"><label>Busca</label><input type="text" id="hSearch" placeholder="Nome..." onkeyup="applyHeatmapFilters()"></div>
-                    <div style="margin-left: auto; color:var(--text-light);">Exibindo <strong id="heatCount">0</strong> registros</div>
-                </div>
-                
-                <div id="scaleLegendHeat" class="scale-legend"></div>
-                
-                <div style="overflow-x:auto;"><table id="tableHeat"><thead id="headHeat"></thead><tbody id="tbodyHeat"></tbody></table></div>
-                <div class="pagination-container no-print"><button class="btn-page" onclick="changeHeatPage(-1)">Anterior</button><span id="pageIndicatorHeat" class="page-info">1</span><button class="btn-page" onclick="changeHeatPage(1)">Próximo</button></div>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
-    // --- TOP LEVEL HELPER FUNCTIONS (PREVENT NOT DEFINED ERRORS) ---
+    // --- TOP LEVEL HELPER FUNCTIONS ---
     
     // DATA DICTIONARY
     const criteriaDetails = {
@@ -412,45 +401,47 @@
        "TER ATENÇÃO AOS RESULTADOS - COMPORTAMENTO": { desc: "Foco no coletivo.", behaviors: "Priorização do resultado organizacional." }
     };
 
-    // GLOBAL VARIABLES
+    // GLOBAL VARIABLES - SET DEFAULT 1-4 HERE TO BE SAFE
     let rawData = [], draftData = [], currentFilteredData = [];
+    // Heatmap filtering logic specific (even if removed, good to keep structure for stability)
+    let filteredHeatCollaborators = [];
+    
     let charts = {}, currentManagerData = null;
     let allCriteria = new Set();
-    let currentPage = 1, heatPage = 1;
+    let currentPage = 1;
     const itemsPerPage = 15;
-    let heatSort = { col: 'nome', ord: 'asc' };
     let hasSuper = true; 
-    let scaleConfig = { max: 4, t1: 2, t2: 3, t3: 4 };
+    let scaleConfig = { max: 4, t1: 1.75, t2: 2.50, t3: 3.50 }; // Default 1-4 HARDCODED
     let showOnlyAttention = false;
 
     // HELPER FUNCTIONS
     function getStatusLabel(avg) {
-        if(avg < scaleConfig.t1) return { t: "MUITO ABAIXO", c: "#C0392B" };
-        if(avg < scaleConfig.t2) return { t: "ABAIXO", c: "#E67E22" };
-        if(avg < scaleConfig.t3) return { t: "ATENDE", c: "#2980B9" };
-        return { t: "ACIMA", c: "#27AE60" };
+        if(avg < 1.75) return { t: "MUITO ABAIXO", c: "#8B0000" };
+        if(avg < 2.50) return { t: "ABAIXO", c: "#DC3545" };
+        if(avg < 3.50) return { t: "ATENDE", c: "#E67E22" };
+        return { t: "ACIMA", c: "#28A745" };
     }
 
     function generatePDI(crit, nota, isHigh, gestor) {
         const det = criteriaDetails[crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhorar desempenho geral."};
         if(isHigh) {
             return `<div style="background:#E8F5E9; padding:12px; border-radius:8px; font-size:0.85rem;">
-            <strong>🚀 Expansão: ${crit}</strong> (${det.desc})
+            <strong>🚀 Análise FOFA (Destaque): ${crit}</strong>
             <ul style="margin:5px 0 5px 15px;">
-                <li><strong>70% (Prática):</strong> Liderar squad focado em inovação de processos usando ${crit}. Mentorar novos colaboradores.</li>
-                <li><strong>20% (Troca):</strong> Benchmark externo com empresas referência e apresentação de insights para a diretoria.</li>
-                <li><strong>10% (Formal):</strong> MBA ou Especialização Avançada.</li>
+                <li><strong>Forças:</strong> Alto domínio técnico e comportamental, servindo de referência.</li>
+                <li><strong>Oportunidades:</strong> Assumir mentoria de novos colaboradores e liderar projetos de inovação.</li>
+                <li><strong>Ameaças:</strong> Desmotivação por falta de novos desafios complexos.</li>
             </ul>
-            <strong>🎯 SMART:</strong> "Aumentar a eficiência do setor em 15% aplicando ${crit} em novos projetos até o final do ano."</div>`;
+            <strong>Ação:</strong> "Formalizar papel de multiplicador interno para esta competência."</div>`;
         } else {
             return `<div style="background:#FFF3E0; padding:12px; border-radius:8px; font-size:0.85rem;">
-            <strong>🛠️ Recuperação: ${crit}</strong> (${det.desc})
+            <strong>🛠️ Análise FOFA (Atenção): ${crit}</strong>
             <ul style="margin:5px 0 5px 15px;">
-                <li><strong>70% (Prática):</strong> Executar plano de ação corretivo com supervisão diária. Realizar entregas críticas em par (Pairing).</li>
-                <li><strong>20% (Troca):</strong> Feedback semanal estruturado com ${gestor} focado em evidências de mudança comportamental.</li>
-                <li><strong>10% (Formal):</strong> Releitura e prova de conhecimento dos manuais internos e políticas da área.</li>
+                <li><strong>Fraquezas:</strong> Dificuldade em evidenciar os comportamentos esperados (${det.desc}).</li>
+                <li><strong>Ameaças:</strong> Impacto negativo nos KPIs da área e sobrecarga da equipe.</li>
+                <li><strong>Oportunidades:</strong> Crescimento rápido através de acompanhamento próximo com ${gestor}.</li>
             </ul>
-            <strong>🎯 SMART:</strong> "Eliminar 100% dos erros operacionais em ${crit} e atingir nota mínima de ${scaleConfig.t2} em 3 meses."</div>`;
+            <strong>Ação:</strong> "Iniciar ciclo de feedback quinzenal focado em evidências práticas."</div>`;
         }
     }
 
@@ -470,13 +461,15 @@
     
     function updateLegends() {
         const legendHTML = `
-            <div class="legend-item"><span class="legend-dot" style="background:#C0392B;"></span> Muito Abaixo (< ${scaleConfig.t1})</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#E67E22;"></span> Abaixo (${scaleConfig.t1} - ${scaleConfig.t2})</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#2980B9;"></span> Atende (${scaleConfig.t2} - ${scaleConfig.t3})</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#27AE60;"></span> Acima (> ${scaleConfig.t3})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#8B0000;"></span> Muito Abaixo (< 1,75)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#DC3545;"></span> Abaixo (1,75 a 2,49)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#FFC107;"></span> Atende (2,50 a 3,49)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#28A745;"></span> Acima (3,50 a 4,00)</div>
         `;
-        document.getElementById('scaleLegendPart').innerHTML = legendHTML;
-        document.getElementById('scaleLegendHeat').innerHTML = legendHTML;
+        const legendContainer = document.getElementById('scaleLegendPart');
+        if (legendContainer) {
+            legendContainer.innerHTML = legendHTML;
+        }
     }
 
     // --- SESSION ---
@@ -538,9 +531,11 @@
     
     function setScaleConfig(max) {
         max = parseInt(max);
-        scaleConfig = { max: max, t1: max * 0.50, t2: max * 0.75, t3: max * 0.90 };
-        if (max === 4) scaleConfig = { max: 4, t1: 2, t2: 3, t3: 3.8 };
-        if (max === 5) scaleConfig = { max: 5, t1: 2.5, t2: 3.5, t3: 4.5 };
+        if (max === 4) {
+            scaleConfig = { max: 4, t1: 1.75, t2: 2.50, t3: 3.50 };
+        } else {
+            scaleConfig = { max: max, t1: max * 0.50, t2: max * 0.75, t3: max * 0.90 };
+        }
     }
 
     function handleFile(input) {
@@ -567,8 +562,6 @@
         const idxGestor = getIdx(['gestor']);
         const idxCrit = getIdx(['compet', 'crit', 'comp']);
         const idxNota = getIdx(['nota', 'result']);
-        
-        // FIXED LOGIC: Strict Look for 'tipo' specifically, if not found, use Column P (index 15)
         let idxTipo = getIdx(['tipo']); 
         if (idxTipo === -1) idxTipo = 15; 
         
@@ -613,7 +606,8 @@
                     gestor: forceFixEncoding(r[idxGestor]),
                     criteriaScores: {}, sum: 0, count: 0, detailedScores: {},
                     sumManager: 0, countManager: 0, 
-                    hasSelf: false, hasManager: false
+                    hasSelf: false, hasManager: false,
+                    globalSum: 0, globalCount: 0 
                 };
             }
             const crit = forceFixEncoding(r[idxCrit]) || 'Geral';
@@ -625,7 +619,6 @@
                 map[uid].criteriaScores[crit] = val;
                 map[uid].sum += val; map[uid].count++;
                 
-                // ROBUST SELF-EVAL DETECTION
                 if(tipo.includes('auto') || tipo.includes('self') || tipo.includes('próprio') || tipo.includes('proprio') || tipo.includes('colaborador')) {
                     map[uid].detailedScores[crit].self = val;
                     map[uid].hasSelf = true;
@@ -636,14 +629,29 @@
                     map[uid].sumManager += val;
                     map[uid].countManager++;
                 }
+                
+                // GLOBAL TRACKING
+                map[uid].globalSum += val;
+                map[uid].globalCount++;
+
                 allCriteria.add(crit);
             }
         });
 
         rawData = Object.values(map).map(e => {
-            e.avg = e.count > 0 ? (e.sum / e.count) : 0;
-            e.avgManager = e.countManager > 0 ? (e.sumManager / e.countManager) : 0; 
-            e.scores = Object.entries(e.criteriaScores).map(([k,v]) => ({crit:k, nota:v})).sort((a,b) => a.nota - b.nota);
+            e.avg = e.countManager > 0 ? (e.sumManager / e.countManager) : 0;
+            e.avgManager = e.avg; 
+            
+            // Global Avg (Self + Manager)
+            e.avgGlobal = e.globalCount > 0 ? (e.globalSum / e.globalCount) : 0;
+            
+            let mScores = [];
+            for (const [c, det] of Object.entries(e.detailedScores)) {
+                if(det.manager !== null) {
+                    mScores.push({crit: c, nota: det.manager});
+                }
+            }
+            e.scores = mScores.sort((a,b) => a.nota - b.nota);
             return e;
         });
 
@@ -660,7 +668,7 @@
 
     function initDashboard() {
         populateFilters();
-        updateLegends(); // Create legends
+        updateLegends(); 
         
         if(draftData.length > 0) {
             const draftMap = {};
@@ -714,9 +722,9 @@
         applyPartFilters();
         updatePerformanceFilters();
         updateGestaoFilters();
-        applyHeatmapFilters();
     }
 
+    // --- TAB 1 GERAL ---
     function updateVisaoGeral() {
         const data = currentFilteredData;
         const safeSet = (list) => new Set(list).size;
@@ -726,18 +734,33 @@
         document.getElementById('cntGestores').innerText = safeSet(data.map(i=>i.gestor));
         
         document.getElementById('kpiTotal').innerText = data.length;
-        const avgTotal = data.reduce((a,b)=>a+b.avg,0)/(data.length||1);
-        document.getElementById('kpiMedia').innerText = avgTotal.toFixed(2);
-        document.getElementById('kpiGaps').innerText = data.filter(i=>i.avg < scaleConfig.t2).length;
         
-        const critMap = {}; data.forEach(i=>i.scores.forEach(s=>{if(!critMap[s.crit])critMap[s.crit]={s:0,c:0};critMap[s.crit].s+=s.nota;critMap[s.crit].c++}));
-        const sortedDesc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>b.v-a.v);
+        // ** ADJUSTMENT: MEDIA GLOBAL DE COMPETENCIAS (Gestor Only based on previous requirements) **
+        const totalSum = data.reduce((a,b)=>a+b.avg,0);
+        const avgTotal = data.length > 0 ? (totalSum / data.length) : 0;
+        document.getElementById('kpiMedia').innerText = avgTotal.toFixed(2);
+        
+        // ** REMOVED "ATTENTION" KPI AS REQUESTED **
+        
+        const critMap = {}; 
+        // Best/Worst uses average of Manager scores
+        data.forEach(p => {
+             for(let c in p.detailedScores) {
+                 if(p.detailedScores[c].manager !== null) {
+                     if(!critMap[c]) critMap[c] = {s:0, n:0};
+                     critMap[c].s += p.detailedScores[c].manager;
+                     critMap[c].n++;
+                 }
+             }
+        });
+        const sortedDesc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.n})).sort((a,b)=>b.v-a.v);
         
         if(sortedDesc.length){
             document.getElementById('kpiBestComp').innerText = `${sortedDesc[0].k} (${sortedDesc[0].v.toFixed(2)})`;
             document.getElementById('kpiWorstComp').innerText = `${sortedDesc[sortedDesc.length-1].k} (${sortedDesc[sortedDesc.length-1].v.toFixed(2)})`;
         }
-
+        
+        // --- RENDER BLOCK FOR CHARTS ---
         const renderBlock = (idChart, idTable, key) => {
             if(key === 'superintendencia' && !hasSuper) return;
             const grouped = groupBy(data, key);
@@ -749,6 +772,43 @@
         renderBlock('chartDept', 'tableDept', 'dept');
         renderBlock('chartCargo', 'tableCargo', 'cargo');
         
+        // --- NEW DISTRIBUTION CHART (GLOBAL AVERAGE: Gestor + Auto) ---
+        let countMA = 0, countA = 0, countAt = 0, countAc = 0;
+        data.forEach(d => {
+            if(d.avgGlobal < 1.75) countMA++;
+            else if(d.avgGlobal < 2.50) countA++;
+            else if(d.avgGlobal < 3.50) countAt++;
+            else countAc++;
+        });
+        
+        const ctxDist = document.getElementById('chartDistributionGeral');
+        if (charts['dist']) charts['dist'].destroy();
+        charts['dist'] = new Chart(ctxDist, {
+            type: 'doughnut',
+            data: {
+                labels: ['Muito Abaixo', 'Abaixo', 'Atende', 'Acima'],
+                datasets: [{
+                    data: [countMA, countA, countAt, countAc],
+                    backgroundColor: ['#8B0000', '#DC3545', '#FFC107', '#28A745']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+        
+        const total = data.length || 1;
+        document.getElementById('distLabels').innerHTML = `
+            <span style="color:#8B0000">Muito Abaixo: ${countMA} (${((countMA/total)*100).toFixed(1)}%)</span>
+            <span style="color:#DC3545">Abaixo: ${countA} (${((countA/total)*100).toFixed(1)}%)</span>
+            <span style="color:#E67E22">Atende: ${countAt} (${((countAt/total)*100).toFixed(1)}%)</span>
+            <span style="color:#28A745">Acima: ${countAc} (${((countAc/total)*100).toFixed(1)}%)</span>
+        `;
+
         updateGargaloFilters();
     }
     
@@ -756,15 +816,46 @@
         const p = document.getElementById('gargaloPapel').value;
         const data = (p === 'all') ? currentFilteredData : currentFilteredData.filter(d => d.papel === p);
         
-        const critMap = {}; data.forEach(i=>i.scores.forEach(sc=>{if(!critMap[sc.crit])critMap[sc.crit]={s:0,c:0};critMap[sc.crit].s+=sc.nota;critMap[sc.crit].c++}));
-        const sortedAsc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>a.v-b.v);
+        // FIX: Calculate GLOBAL Average (Self + Manager) for Gargalos
+        let critSums = {};
+        
+        // Initialize ALL criteria to 0 to ensure they appear on chart
+        allCriteria.forEach(c => {
+             critSums[c] = {s:0, n:0};
+        });
+
+        data.forEach(p => {
+             for(let c in p.detailedScores) {
+                 // Check Self score
+                 if(p.detailedScores[c].self !== null) {
+                     critSums[c].s += p.detailedScores[c].self;
+                     critSums[c].n++;
+                 }
+                 // Check Manager score
+                 if(p.detailedScores[c].manager !== null) {
+                     critSums[c].s += p.detailedScores[c].manager;
+                     critSums[c].n++;
+                 }
+             }
+        });
+        
+        let sortedAsc = [];
+        for (let c in critSums) {
+            // Push all criteria, even if avg is 0
+             let val = critSums[c].n > 0 ? (critSums[c].s / critSums[c].n) : 0;
+             sortedAsc.push({k: c, v: val});
+        }
+        
+        // Sort lowest to highest
+        sortedAsc.sort((a,b) => a.v - b.v);
         
         if(document.getElementById('gargaloInsight')) {
              let html = "Sem dados suficientes.";
              if(sortedAsc.length > 0) {
                  const worst = sortedAsc[0];
                  const best = sortedAsc[sortedAsc.length-1];
-                 const opp = sortedAsc[Math.floor((sortedAsc.length-1)/2)];
+                 const mid = Math.floor(sortedAsc.length / 2);
+                 const opp = sortedAsc[mid];
                  const wDet = criteriaDetails[worst.k.toUpperCase()] || {desc: "Competência Crítica", behaviors: "Melhorar desempenho."};
                  html = `<ul style="text-align:left; margin:0; padding-left:15px;">
                     <li style="color:#C0392B;"><strong>🚨 Ponto de Atenção: ${worst.k} (${worst.v.toFixed(2)})</strong><br><small>${wDet.desc} - Ação: Programa de Mentoria.</small></li>
@@ -775,21 +866,37 @@
              document.getElementById('gargaloInsight').innerHTML = html;
              document.getElementById('gargaloInsight').style.display='block';
         }
-        createChart('chartGargalos', 'line', sortedAsc.map(x=>x.k), sortedAsc.map(x=>x.v), '#E74C3C');
+        
+        // FIX: Ensure all labels show up by disabling autoSkip
+        if(charts['chartGargalos']) charts['chartGargalos'].destroy();
+        const ctx = document.getElementById('chartGargalos');
+        if(!ctx) return;
+        charts['chartGargalos'] = new Chart(ctx, {
+            type: 'line', 
+            data: { 
+                labels: sortedAsc.map(x=>x.k), 
+                datasets:[{
+                    label:'Média Geral (Global)', 
+                    data: sortedAsc.map(x=>x.v), 
+                    borderColor: '#E74C3C', 
+                    backgroundColor: '#E74C3C'
+                }] 
+            },
+            options: { 
+                indexAxis: 'x', 
+                maintainAspectRatio: false, 
+                responsive: true, 
+                scales: { 
+                    x: { ticks: { autoSkip: false } }, // Force all labels
+                    y: { max: scaleConfig.max } 
+                } 
+            }
+        });
     }
 
-    function goToAttentionList() {
-        showOnlyAttention = true;
-        switchTab('participantes');
-        document.getElementById('fCargo').value = 'all';
-        document.getElementById('fSearch').value = '';
-        document.getElementById('fNota').value = 'all';
-        applyPartFilters();
-    }
-
+    // --- TAB 2 PARTICIPANTES ---
     function applyPartFilters(fromSelect = false) {
         if(fromSelect) showOnlyAttention = false;
-
         const c = document.getElementById('fCargo').value;
         const txt = document.getElementById('fSearch').value.toLowerCase();
         const n = document.getElementById('fNota').value;
@@ -797,13 +904,14 @@
         let data = currentFilteredData.filter(i => {
             let passScore = true;
             if(showOnlyAttention) {
-                passScore = (i.avg < scaleConfig.t2);
+                // Special view: GLOBAL Avg < 2.50
+                passScore = (i.avgGlobal < 2.50);
             } else {
                 passScore = (n==='all' || 
-                            (n==='range1' && i.avg<scaleConfig.t1) || 
-                            (n==='range2' && i.avg>=scaleConfig.t1 && i.avg<scaleConfig.t2) || 
-                            (n==='range3' && i.avg>=scaleConfig.t2 && i.avg<scaleConfig.t3) || 
-                            (n==='range4' && i.avg>=scaleConfig.t3));
+                            (n==='range1' && i.avg < 1.75) || 
+                            (n==='range2' && i.avg >= 1.75 && i.avg < 2.50) || 
+                            (n==='range3' && i.avg >= 2.50 && i.avg < 3.50) || 
+                            (n==='range4' && i.avg >= 3.50));
             }
             return passScore && (c==='all'||i.cargo===c) && (i.nome.toLowerCase().includes(txt) || i.matricula.toLowerCase().includes(txt));
         });
@@ -831,8 +939,8 @@
         
         pageData.forEach((p, idx) => {
              const st = getStatusLabel(p.avg);
-             const focus = p.avg >= scaleConfig.t3 ? (p.scores.length > 0 ? p.scores[p.scores.length-1] : {crit:'N/A', nota:0}) : (p.scores.length > 0 ? p.scores[0] : {crit:'N/A', nota:0});
-             const pdi = generatePDI(focus.crit, focus.nota, p.avg >= scaleConfig.t3, p.gestor);
+             const focus = p.scores.length > 0 ? (p.avg >= 3.50 ? p.scores[p.scores.length-1] : p.scores[0]) : {crit:'N/A', nota:0};
+             const pdi = generatePDI(focus.crit, focus.nota, p.avg >= 3.50, p.gestor);
              
              let alertMissing = "";
              if(!p.hasSelf || !p.hasManager) {
@@ -842,18 +950,41 @@
                  alertMissing = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; margin-bottom:10px; font-weight:bold; font-size:0.8rem;"><i class="fas fa-exclamation-triangle"></i> Atenção: Média parcial. Falta: ${missing.join(", ")}</div>`;
              }
 
+             // Logic for Media Display (Hide if no manager)
+             let mediaDisplay = '';
+             let statusDisplay = '';
+             let pdiDisplay = '';
+             
+             if(!p.hasManager) {
+                 mediaDisplay = '<span class="badge" style="background:#ffebee; color:#c62828"><i class="fas fa-exclamation-circle"></i> Pendente Gestor</span>';
+                 statusDisplay = '<span style="color:#999;">-</span>';
+                 pdiDisplay = '<span style="color:#999; font-style:italic;">Aguardando nota do gestor para gerar PDI.</span>';
+             } else {
+                 mediaDisplay = `<span class="badge" style="background:#e3f2fd; color:#0F4C75" title="Média Gestor (Final)">${p.avg.toFixed(2)}</span>`;
+                 statusDisplay = `<div class="status-label" style="color:${st.c}">${st.t}</div>`;
+                 pdiDisplay = pdi;
+             }
+             
+             // Calc specific averages for detailed header
+             let sumS=0, cntS=0, sumM=0, cntM=0;
+             Object.values(p.detailedScores).forEach(v => {
+                if(v.self !== null) { sumS+=v.self; cntS++; }
+                if(v.manager !== null) { sumM+=v.manager; cntM++; }
+             });
+             const avgSelf = cntS ? (sumS/cntS).toFixed(2) : '-';
+             const avgMgr = cntM ? (sumM/cntM).toFixed(2) : '-';
+
              htmlRows += `<tr>
                 <td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td>
                 <td><strong>${p.nome}</strong><br><small>${p.cargo}</small></td>
                 <td>${p.gestor}<br><small>${p.dept}</small></td>
                 <td>
-                    <div class="status-label" style="color:${st.c}">${st.t}</div>
+                    ${statusDisplay}
                     <div style="display:flex; gap:5px; align-items:center;">
-                        <span class="badge" style="background:${st.c}20; color:${st.c}" title="Média Geral">${p.avg.toFixed(2)}</span>
-                        <span class="badge" style="background:#e3f2fd; color:#0F4C75" title="Média Gestor (100%)">G: ${p.avgManager.toFixed(2)}</span>
+                        ${mediaDisplay}
                     </div>
                 </td>
-                <td>${pdi}</td>
+                <td>${pdiDisplay}</td>
                 <td><button class="btn-action no-print" onclick="downloadParticipantPDF('${p.uid}')"><i class="fas fa-file-pdf"></i> Dossiê</button></td>
              </tr>
              <tr id="row-${idx}" class="row-detail">
@@ -861,23 +992,16 @@
                     <div class="detail-flex">
                         ${alertMissing}
                         <div class="detail-table">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:#f8f9fa; padding:10px; border-radius:6px; font-weight:bold; font-size:0.9rem;">
+                                <span>Média Autoavaliação: ${avgSelf}</span>
+                                <span>Média Gestor: ${avgMgr}</span>
+                            </div>
                             <h4>Detalhamento de Notas</h4>
                             <table>
-                                <thead>
-                                    <tr>
-                                        <th style="font-size:0.75rem;">Competência</th>
-                                        <th style="font-size:0.75rem;">Autoavaliação</th>
-                                        <th style="font-size:0.75rem;">Gestor</th>
-                                    </tr>
-                                </thead>
+                                <thead><tr><th style="font-size:0.75rem;">Competência</th><th style="font-size:0.75rem;">Autoavaliação</th><th style="font-size:0.75rem;">Gestor</th></tr></thead>
                                 <tbody>
-                                    ${p.scores.map(s => {
-                                        const det = p.detailedScores[s.crit] || { self: null, manager: null };
-                                        return `<tr>
-                                            <td>${s.crit}</td>
-                                            <td>${fmt(det.self)}</td>
-                                            <td>${fmt(det.manager)}</td>
-                                        </tr>`;
+                                    ${Object.entries(p.detailedScores).map(([k,v]) => {
+                                        return `<tr><td>${k}</td><td>${fmt(v.self)}</td><td>${fmt(v.manager)}</td></tr>`;
                                     }).join('')}
                                 </tbody>
                             </table>
@@ -892,7 +1016,6 @@
                 </td>
              </tr>`;
         });
-        
         tbody.innerHTML = htmlRows;
 
         setTimeout(() => {
@@ -910,18 +1033,13 @@
             });
         }, 300);
     }
-    
+
     function downloadParticipantPDF(uid) {
         const p = rawData.find(x => x.uid === uid);
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         doc.setFontSize(18); doc.text(`Dossiê: ${p.nome}`, 14, 20);
         doc.setFontSize(11); doc.text(`Cargo: ${p.cargo} | Média: ${p.avg.toFixed(2)}`, 14, 30);
-        
-        const bodyData = p.scores.map(s => {
-             const det = p.detailedScores[s.crit] || {};
-             return [s.crit, (det.self ? det.self.toFixed(2) : '-'), (det.manager ? det.manager.toFixed(2) : '-')];
-        });
-        
+        const bodyData = Object.entries(p.detailedScores).map(([k,v]) => [k, (v.self ? v.self.toFixed(2) : '-'), (v.manager ? v.manager.toFixed(2) : '-')]);
         doc.autoTable({ startY: 40, head: [['Competência', 'Auto', 'Gestor']], body: bodyData });
         doc.save(`Dossie_${p.nome}.pdf`);
     }
@@ -929,7 +1047,7 @@
     // --- TAB 3 PERFORMANCE ---
     function updatePerformanceFilters() {
         const sub = currentFilteredData; 
-        const conc = {}; sub.forEach(i => { const k=i.superintendencia; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<scaleConfig.t1)conc[k][0]++; else if(i.avg<scaleConfig.t2)conc[k][1]++; else if(i.avg<scaleConfig.t3)conc[k][2]++; else conc[k][3]++; });
+        const conc = {}; sub.forEach(i => { const k=i.superintendencia; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<1.75)conc[k][0]++; else if(i.avg<2.50)conc[k][1]++; else if(i.avg<3.50)conc[k][2]++; else conc[k][3]++; });
         const lbls = Object.keys(conc);
         if(charts.concepts) charts.concepts.destroy();
         charts.concepts = new Chart(document.getElementById('chartConcepts'), {
@@ -943,12 +1061,21 @@
         });
 
         let q1=0,q2=0,q3=0,q4=0;
-        sub.forEach(x => { if(x.avg<scaleConfig.t1)q1++; else if(x.avg<scaleConfig.t2)q2++; else if(x.avg<scaleConfig.t3)q3++; else q4++; });
-        createChart('chartQuartis', 'bar', ['Muito Abaixo','Abaixo','Atende','Acima'], [q1,q2,q3,q4], ['#C0392B','#E74C3C','#3498DB','#27AE60']);
+        sub.forEach(x => { if(x.avg<1.75)q1++; else if(x.avg<2.50)q2++; else if(x.avg<3.50)q3++; else q4++; });
+        createChart('chartQuartis', 'bar', ['Muito Abaixo','Abaixo','Atende','Acima'], [q1,q2,q3,q4], ['#8B0000','#DC3545','#FFC107','#27AE60']);
 
-        const compMap = {}; sub.forEach(p=>p.scores.forEach(s=>{ if(!compMap[s.crit]) compMap[s.crit]={s:0,c:0}; compMap[s.crit].s+=s.nota; compMap[s.crit].c++; }));
-        const listComp = Object.entries(compMap).map(([k,v])=>({k, v:v.s/v.c})).sort((a,b)=>b.v-a.v);
-        document.getElementById('tableCompRank').getElementsByTagName('tbody')[0].innerHTML = listComp.map(r=>`<tr><td>${r.k}</td><td style="text-align:center;">${r.v.toFixed(2)}</td><td style="text-align:center;">${r.v<scaleConfig.t2?'🔴':(r.v<scaleConfig.t3?'🟡':'🟢')}</td></tr>`).join('');
+        let compSums = {};
+        sub.forEach(p => {
+             for(let c in p.detailedScores) {
+                 if(p.detailedScores[c].manager !== null) {
+                     if(!compSums[c]) compSums[c] = {s:0, n:0};
+                     compSums[c].s += p.detailedScores[c].manager;
+                     compSums[c].n++;
+                 }
+             }
+        });
+        const listComp = Object.entries(compSums).map(([k,v])=>({k, v:v.s/v.n})).sort((a,b)=>b.v-a.v);
+        document.getElementById('tableCompRank').getElementsByTagName('tbody')[0].innerHTML = listComp.map(r=>`<tr><td>${r.k}</td><td style="text-align:center;">${r.v.toFixed(2)}</td><td style="text-align:center;">${r.v<2.50?'🔴':(r.v<3.50?'🟡':'🟢')}</td></tr>`).join('');
     }
 
     // --- TAB 4 GESTAO ---
@@ -965,39 +1092,29 @@
     function renderManagerProfile() {
         const g = document.getElementById('gestaoSelect').value;
         const subset = (g === 'all') ? currentFilteredData : currentFilteredData.filter(i => i.gestor === g);
-        
         document.getElementById('gestorProfile').style.display='block';
         document.getElementById('gestorName').innerText = (g !== 'all') ? g : "Visão Agregada";
         document.getElementById('gestorHeadcount').innerText = subset.length;
         
-        const crit = {}; subset.forEach(t=>t.scores.forEach(sc=>{if(!crit[sc.crit])crit[sc.crit]={s:0,c:0};crit[sc.crit].s+=sc.nota;crit[sc.crit].c++}));
-        const list = Object.entries(crit).map(([k,v])=>({k,v:v.s/v.c})).sort((a,b)=>b.v-a.v);
+        let compSums = {};
+        subset.forEach(p => {
+             for(let c in p.detailedScores) {
+                 if(p.detailedScores[c].manager !== null) {
+                     if(!compSums[c]) compSums[c] = {s:0, n:0};
+                     compSums[c].s += p.detailedScores[c].manager;
+                     compSums[c].n++;
+                 }
+             }
+        });
+        const list = Object.entries(compSums).map(([k,v])=>({k,v:v.s/v.n})).sort((a,b)=>b.v-a.v);
         
         if(list.length > 0) {
             document.getElementById('gestorTop3').innerHTML = list.slice(0,3).map(x=>`<li>${x.k} (${x.v.toFixed(2)})</li>`).join('');
             document.getElementById('gestorBottom3').innerHTML = list.slice(-3).reverse().map(x=>`<li>${x.k} (${x.v.toFixed(2)})</li>`).join('');
-            
             const gap = list[list.length-1];
             const strong = list[0];
             const det = criteriaDetails[gap.k.toUpperCase()] || {desc: "Resultados", behaviors: "Melhoria contínua."};
-            
-            document.getElementById('gestorActionPlan').innerHTML = `
-                <div style="background:#f0f7ff; padding:15px; border-radius:8px; margin-bottom:15px; font-size:0.9rem;">
-                    <strong>SWOT (Foco Estratégico):</strong><br>
-                    <strong>Strengths:</strong> Equipe domina ${strong.k}, o que pode alavancar novos projetos.<br>
-                    <strong>Weaknesses:</strong> Gap em ${gap.k} está gerando retrabalho/atrasos.<br>
-                    <strong>Opportunities:</strong> Criar programa de Mentoria Interna usando os top performers.<br>
-                    <strong>Threats:</strong> Perda de competitividade se ${gap.k} não for corrigido em 60 dias.
-                </div>
-                <strong>PDCA (${gap.k})</strong>
-                <ul style="font-size:0.9rem;">
-                    <li><strong>Plan:</strong> Analisar a causa raiz da falha em "${det.behaviors}". Definir cronograma de capacitação.</li>
-                    <li><strong>Do:</strong> Executar workshops práticos e rotação de funções (Job Rotation) para forçar aprendizado.</li>
-                    <li><strong>Check:</strong> Medir KPIs de ${gap.k} semanalmente e realizar pulsos de clima.</li>
-                    <li><strong>Act:</strong> Padronizar os novos processos e reconhecer publicamente as melhorias.</li>
-                </ul>
-                <div style="margin-top:10px; background:#e3f2fd; padding:10px; border-radius:8px;"><strong>🎯 SMART:</strong> "Aumentar a nota média da equipe em ${gap.k} de ${gap.v.toFixed(2)} para ${scaleConfig.t3} em 4 meses, reduzindo erros em 20%."</div>
-            `;
+            document.getElementById('gestorActionPlan').innerHTML = `<div style="background:#f0f7ff; padding:15px; border-radius:8px; margin-bottom:15px; font-size:0.9rem;"><h4 style="margin-top:0; color:var(--primary);"><i class="fas fa-th-large"></i> Matriz FOFA (SWOT) da Equipe</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div style="background:#e8f5e9; padding:10px; border-radius:6px;"><strong>1. Forças (Interno):</strong><br>A equipe demonstra alta performance em <em>${strong.k}</em>.</div><div style="background:#ffebee; padding:10px; border-radius:6px;"><strong>2. Fraquezas (Interno):</strong><br>O gap em <em>${gap.k}</em> é o principal gargalo atual.</div><div style="background:#fff3cd; padding:10px; border-radius:6px;"><strong>3. Oportunidades (Externo):</strong><br>Utilizar os destaques em ${strong.k} para treinar os pares.</div><div style="background:#f3e5f5; padding:10px; border-radius:6px;"><strong>4. Ameaças (Externo):</strong><br>Se o gap em ${gap.k} persistir, há risco de perda de competitividade.</div></div></div>`;
             currentManagerData = { name: (g!=='all'?g:'Visão Agregada'), teamSize: subset.length, top3: list.slice(0,3), bottom3: list.slice(-3) };
         }
     }
@@ -1010,92 +1127,44 @@
         doc.save(`Gestao_${currentManagerData.name}.pdf`);
     }
 
-    // --- TAB 5 ---
-    function applyHeatmapFilters() {
-         const txt = document.getElementById('hSearch').value.toLowerCase();
-         filteredHeatCollaborators = currentFilteredData.filter(i => i.nome.toLowerCase().includes(txt));
-         renderHeatmap();
+    function toggleDetails(id) { const el=document.getElementById(id); el.style.display=el.style.display==='table-row'?'none':'table-row'; }
+    function clearGlobalFilters() { document.getElementById('globalSuper').value = 'all'; applyGlobalFilters('super'); }
+    function clearPartFilters() { document.getElementById('fCargo').value = 'all'; applyPartFilters(); }
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+        document.getElementById('tab-'+id).classList.add('active');
+        if(event && event.target) {
+            const btn = event.target.closest('.nav-btn');
+            if(btn) btn.classList.add('active');
+        }
+        if(id==='performance') setTimeout(updatePerformanceFilters, 50);
+        else if(id==='participantes') applyPartFilters();
+        else if(id==='gestao') updateGestaoFilters();
+        else if(id==='geral') updateVisaoGeral();
     }
-    
-    function clearHeatFilters() { document.getElementById('hSearch').value = ''; applyHeatmapFilters(); }
-    function sortHeatmap(col) {
-        if(heatSort.col === col) { heatSort.ord = (heatSort.ord === 'asc') ? 'desc' : 'asc'; } else { heatSort.col = col; heatSort.ord = 'asc'; }
-        renderHeatmap();
-    }
-    function renderHeatmap() {
-        filteredHeatCollaborators.sort((a,b) => {
-            let valA = (heatSort.col === 'nome') ? a.nome : (heatSort.col === 'avg') ? a.avg : (a.criteriaScores[heatSort.col] || 0);
-            let valB = (heatSort.col === 'nome') ? b.nome : (heatSort.col === 'avg') ? b.avg : (b.criteriaScores[heatSort.col] || 0);
-            if(typeof valA === 'string') return (heatSort.ord === 'asc') ? valA.localeCompare(valB) : valB.localeCompare(valA);
-            return (heatSort.ord === 'asc') ? valA - valB : valB - valA;
-        });
-
-        const d = filteredHeatCollaborators.slice((heatPage-1)*itemsPerPage, heatPage*itemsPerPage);
-        const h = document.getElementById('headHeat');
-        const b = document.getElementById('tbodyHeat');
-        const crits = Array.from(allCriteria).sort();
-        
-        h.innerHTML = `<tr><th class="col-fixed" onclick="sortHeatmap('nome')">Nome</th><th onclick="sortHeatmap('avg')">Média</th>${crits.map(c=>`<th onclick="sortHeatmap('${c}')">${c}</th>`).join('')}</tr>`;
-        b.innerHTML = '';
-        d.forEach(p => {
-            const st = getStatusLabel(p.avg);
-            let cells = crits.map(c => {
-                const val = p.criteriaScores[c];
-                const cls = val<scaleConfig.t2?'heat-red':(val<scaleConfig.t3?'heat-yellow':'heat-green');
-                return `<td style="text-align:center"><span class="heat-cell ${cls}">${val?val.toFixed(2):'-'}</span></td>`;
-            }).join('');
-            b.innerHTML += `<tr><td class="col-fixed"><strong>${p.nome}</strong><br><span style="font-size:0.65rem; color:${st.c}; font-weight:800;">${st.t}</span></td><td>${p.avg.toFixed(2)}</td>${cells}</tr>`;
-        });
-        document.getElementById('heatCount').innerText = filteredHeatCollaborators.length;
-        document.getElementById('pageIndicatorHeat').innerText = heatPage;
-    }
-    
-    function changeHeatPage(d) {
-        const total = Math.ceil(filteredHeatCollaborators.length / itemsPerPage) || 1;
-        heatPage += d; if(heatPage < 1) heatPage = 1; if(heatPage > total) heatPage = total;
-        renderHeatmap();
-    }
-    function changePage(d) { currentPage+=d; renderTable(); }
 
     function groupBy(data, key) {
-        const m = {}; data.forEach(i=>{if(!m[i[key]])m[i[key]]={s:0,c:0};m[i[key]].s+=i.avg;m[i[key]].c++});
+        const m = {}; 
+        data.forEach(i=>{
+            if(!i[key]) return;
+            if(!m[i[key]]) m[i[key]]={s:0,c:0};
+            m[i[key]].s+=i.avg;
+            m[i[key]].c++;
+        });
         const s = Object.entries(m).sort((a,b)=>(b[1].s/b[1].c)-(a[1].s/a[1].c));
         return { l: s.map(x=>x[0]), v: s.map(x=>(x[1].s/x[1].c).toFixed(2)) };
     }
-    
+
     function createChart(id, type, l, v, color, opts={}) {
         if(charts[id]) charts[id].destroy();
         const ctx = document.getElementById(id);
         if(!ctx) return;
         charts[id] = new Chart(ctx, {
-            type: type, data: { labels:l, datasets:[{label:'Média', data:v, borderColor:color, backgroundColor:color}] },
+            type: type, 
+            data: { labels:l, datasets:[{label:'Média', data:v, borderColor:color, backgroundColor:color}] },
             options: { indexAxis: opts.indexAxis||'x', maintainAspectRatio: false, responsive: true, scales: { x: { max: scaleConfig.max } } }
         });
-    }
-
-    function toggleDetails(id) { const el=document.getElementById(id); el.style.display=el.style.display==='table-row'?'none':'table-row'; }
-    function clearGlobalFilters() { document.getElementById('globalSuper').value = 'all'; applyGlobalFilters('super'); }
-    function clearPartFilters() { document.getElementById('fCargo').value = 'all'; applyPartFilters(); }
-    
-    // NAVIGATION FIX
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
-        
-        const content = document.getElementById('tab-' + id);
-        if(content) content.classList.add('active');
-
-        if (event && event.target) {
-            const btn = event.target.closest('.nav-btn');
-            if (btn) btn.classList.add('active');
-        }
-
-        // FORÇAR RENDERIZAÇÃO
-        if(id === 'performance') { setTimeout(updatePerformanceFilters, 50); } 
-        else if (id === 'participantes') { applyPartFilters(); } 
-        else if (id === 'gestao') { updateGestaoFilters(); } 
-        else if (id === 'heatmap') { applyHeatmapFilters(); } 
-        else if (id === 'geral') { updateVisaoGeral(); }
     }
 </script>
 </body>
