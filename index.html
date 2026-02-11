@@ -136,6 +136,11 @@
         
         .kpi-clickable { cursor: pointer; transition: 0.2s; }
         .kpi-clickable:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        
+        /* SCALE LEGEND BAR */
+        .scale-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 10px; background: #fff; border-radius: 6px; border: 1px solid #eee; align-items: center; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 600; color: #555; margin-right: 10px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
         @media(max-width: 1000px){ .chart-row { grid-template-columns: 1fr; } .info-grid { grid-template-columns: 1fr 1fr; } .detail-charts { flex-direction: column; } .header-controls { justify-content: flex-start; margin-top: 10px; } }
         .hidden { display: none !important; }
@@ -296,9 +301,12 @@
                     <div class="filter-group"><label>Busca Rápida</label><input type="text" id="fSearch" placeholder="Nome ou Matrícula..." onkeyup="applyPartFilters()"></div>
                     <div style="margin-left: auto; align-self: center; font-weight:bold; color:var(--primary);"><span id="resultCount">0</span> encontrados</div>
                 </div>
+                
+                <div id="scaleLegendPart" class="scale-legend"></div>
+
                 <div style="overflow-x:auto;">
                     <table id="tablePart">
-                        <thead><tr><th width="50" class="no-print">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Média Final</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th class="no-print">Ação</th></tr></thead>
+                        <thead><tr><th width="50" class="no-print">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Médias</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th class="no-print">Ação</th></tr></thead>
                         <tbody id="tbodyPart"></tbody>
                     </table>
                 </div>
@@ -376,6 +384,9 @@
                     <div class="filter-group"><label>Busca</label><input type="text" id="hSearch" placeholder="Nome..." onkeyup="applyHeatmapFilters()"></div>
                     <div style="margin-left: auto; color:var(--text-light);">Exibindo <strong id="heatCount">0</strong> registros</div>
                 </div>
+                
+                <div id="scaleLegendHeat" class="scale-legend"></div>
+                
                 <div style="overflow-x:auto;"><table id="tableHeat"><thead id="headHeat"></thead><tbody id="tbodyHeat"></tbody></table></div>
                 <div class="pagination-container no-print"><button class="btn-page" onclick="changeHeatPage(-1)">Anterior</button><span id="pageIndicatorHeat" class="page-info">1</span><button class="btn-page" onclick="changeHeatPage(1)">Próximo</button></div>
             </div>
@@ -384,6 +395,8 @@
 </div>
 
 <script>
+    // --- TOP LEVEL HELPER FUNCTIONS (PREVENT NOT DEFINED ERRORS) ---
+    
     // DATA DICTIONARY
     const criteriaDetails = {
        "CONFIANÇA - VALOR": { desc: "Conhecer para Confiar.", behaviors: "Sinceridade, respeito, cumprimento de combinados." },
@@ -399,7 +412,7 @@
        "TER ATENÇÃO AOS RESULTADOS - COMPORTAMENTO": { desc: "Foco no coletivo.", behaviors: "Priorização do resultado organizacional." }
     };
 
-    // GLOBAL STATE
+    // GLOBAL VARIABLES
     let rawData = [], draftData = [], currentFilteredData = [];
     let charts = {}, currentManagerData = null;
     let allCriteria = new Set();
@@ -407,27 +420,73 @@
     const itemsPerPage = 15;
     let heatSort = { col: 'nome', ord: 'asc' };
     let hasSuper = true; 
-    let scaleConfig = { max: 4, t1: 2, t2: 3, t3: 4 }; // Default
+    let scaleConfig = { max: 4, t1: 2, t2: 3, t3: 4 };
+    let showOnlyAttention = false;
 
-    // --- SESSION STORAGE MANAGEMENT ---
-    window.onload = function() {
-        loadStateFromSession();
-    };
+    // HELPER FUNCTIONS
+    function getStatusLabel(avg) {
+        if(avg < scaleConfig.t1) return { t: "MUITO ABAIXO", c: "#C0392B" };
+        if(avg < scaleConfig.t2) return { t: "ABAIXO", c: "#E67E22" };
+        if(avg < scaleConfig.t3) return { t: "ATENDE", c: "#2980B9" };
+        return { t: "ACIMA", c: "#27AE60" };
+    }
+
+    function generatePDI(crit, nota, isHigh, gestor) {
+        const det = criteriaDetails[crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhorar desempenho geral."};
+        if(isHigh) {
+            return `<div style="background:#E8F5E9; padding:12px; border-radius:8px; font-size:0.85rem;">
+            <strong>🚀 Expansão: ${crit}</strong> (${det.desc})
+            <ul style="margin:5px 0 5px 15px;">
+                <li><strong>70% (Prática):</strong> Liderar squad focado em inovação de processos usando ${crit}. Mentorar novos colaboradores.</li>
+                <li><strong>20% (Troca):</strong> Benchmark externo com empresas referência e apresentação de insights para a diretoria.</li>
+                <li><strong>10% (Formal):</strong> MBA ou Especialização Avançada.</li>
+            </ul>
+            <strong>🎯 SMART:</strong> "Aumentar a eficiência do setor em 15% aplicando ${crit} em novos projetos até o final do ano."</div>`;
+        } else {
+            return `<div style="background:#FFF3E0; padding:12px; border-radius:8px; font-size:0.85rem;">
+            <strong>🛠️ Recuperação: ${crit}</strong> (${det.desc})
+            <ul style="margin:5px 0 5px 15px;">
+                <li><strong>70% (Prática):</strong> Executar plano de ação corretivo com supervisão diária. Realizar entregas críticas em par (Pairing).</li>
+                <li><strong>20% (Troca):</strong> Feedback semanal estruturado com ${gestor} focado em evidências de mudança comportamental.</li>
+                <li><strong>10% (Formal):</strong> Releitura e prova de conhecimento dos manuais internos e políticas da área.</li>
+            </ul>
+            <strong>🎯 SMART:</strong> "Eliminar 100% dos erros operacionais em ${crit} e atingir nota mínima de ${scaleConfig.t2} em 3 meses."</div>`;
+        }
+    }
+
+    function fmt(v) {
+        return (v === null || v === undefined) ? '<span style="color:#999; font-style:italic; font-size:0.8em;">Não avaliado</span>' : v.toFixed(2);
+    }
+    
+    function forceFixEncoding(str) {
+        if (!str) return "";
+        str = String(str);
+        const map = {'Ã©':'é','Ã£':'ã','Ã¡':'á','Ã§':'ç','Ãª':'ê','Ã³':'ó','Ã´':'ô','Ãº':'ú','Ã­':'í','Ã ':'à','Ãƒ':'Ã','Ã•':'Õ','PebÃ©':'Pebé'};
+        for (let k in map) str = str.split(k).join(map[k]);
+        try { str = decodeURIComponent(escape(str)); } catch(e){}
+        return str.trim();
+    }
+    function normalize(str) { return str ? String(str).trim().toUpperCase() : ""; }
+    
+    function updateLegends() {
+        const legendHTML = `
+            <div class="legend-item"><span class="legend-dot" style="background:#C0392B;"></span> Muito Abaixo (< ${scaleConfig.t1})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#E67E22;"></span> Abaixo (${scaleConfig.t1} - ${scaleConfig.t2})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#2980B9;"></span> Atende (${scaleConfig.t2} - ${scaleConfig.t3})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#27AE60;"></span> Acima (> ${scaleConfig.t3})</div>
+        `;
+        document.getElementById('scaleLegendPart').innerHTML = legendHTML;
+        document.getElementById('scaleLegendHeat').innerHTML = legendHTML;
+    }
+
+    // --- SESSION ---
+    window.onload = function() { loadStateFromSession(); };
 
     function saveStateToSession(data, draft, scale, superFlag, companyName, logoData) {
         try {
-            const state = {
-                rawData: data,
-                draftData: draft,
-                scaleConfig: scale,
-                hasSuper: superFlag,
-                companyName: companyName,
-                logoData: logoData
-            };
+            const state = { rawData: data, draftData: draft, scaleConfig: scale, hasSuper: superFlag, companyName: companyName, logoData: logoData };
             sessionStorage.setItem('dashboardState', JSON.stringify(state));
-        } catch(e) {
-            console.log("Storage failed", e);
-        }
+        } catch(e) { console.log("Storage failed", e); }
     }
 
     function loadStateFromSession() {
@@ -435,38 +494,15 @@
         if(saved) {
             try {
                 const state = JSON.parse(saved);
-                rawData = state.rawData;
-                draftData = state.draftData;
-                scaleConfig = state.scaleConfig;
-                hasSuper = state.hasSuper;
-                
-                // Restore UI
+                rawData = state.rawData; draftData = state.draftData; scaleConfig = state.scaleConfig; hasSuper = state.hasSuper;
                 if(state.companyName) document.getElementById('headerLogo').innerText = state.companyName;
-                if(state.logoData) {
-                    const img = document.getElementById('headerLogoImg');
-                    img.src = state.logoData;
-                    img.style.display = 'block';
-                }
-                
-                // Hide Super if needed
-                if (!hasSuper) {
-                    document.getElementById('grpFilterSuper').style.display = 'none';
-                    document.getElementById('cardChartSuper').style.display = 'none';
-                    document.getElementById('boxSuper').style.display = 'none';
-                }
-
-                // Hide upload, show main
+                if(state.logoData) { const img = document.getElementById('headerLogoImg'); img.src = state.logoData; img.style.display = 'block'; }
+                if (!hasSuper) { document.getElementById('grpFilterSuper').style.display = 'none'; document.getElementById('cardChartSuper').style.display = 'none'; document.getElementById('boxSuper').style.display = 'none'; }
                 document.getElementById('uploadScreen').style.display = 'none';
                 document.getElementById('mainInterface').classList.remove('hidden');
-                
-                // Re-init
                 filteredDataGlobal = [...rawData];
                 initDashboard();
-                
-            } catch(e) {
-                console.log("Restore failed", e);
-                sessionStorage.removeItem('dashboardState');
-            }
+            } catch(e) { console.log("Restore failed", e); sessionStorage.removeItem('dashboardState'); }
         }
     }
 
@@ -477,21 +513,15 @@
         }
     }
 
-    // --- UPLOAD & LOGO ---
+    // --- UPLOAD ---
     function handleLogoPreview(input) {
         const file = input.files[0];
-        if(file) {
-            document.getElementById('logoPreviewName').innerText = "Selecionado: " + file.name;
-            document.getElementById('logoPreviewName').style.display = 'block';
-        }
+        if(file) { document.getElementById('logoPreviewName').innerText = "Selecionado: " + file.name; document.getElementById('logoPreviewName').style.display = 'block'; }
     }
 
     function triggerUpload() { 
         const name = document.getElementById('companyNameInput').value;
-        if(name && name.trim() !== "") {
-            document.getElementById('headerLogo').innerText = name;
-        }
-        
+        if(name && name.trim() !== "") document.getElementById('headerLogo').innerText = name;
         const logoFile = document.getElementById('logoInput').files[0];
         if(logoFile){
             const reader = new FileReader();
@@ -499,23 +529,16 @@
                 const img = document.getElementById('headerLogoImg');
                 img.src = e.target.result;
                 img.style.display = 'block';
+                saveStateToSession(rawData, draftData, scaleConfig, hasSuper, name, e.target.result);
             };
             reader.readAsDataURL(logoFile);
         }
-
         document.getElementById('csvInput').click(); 
     }
     
     function setScaleConfig(max) {
         max = parseInt(max);
-        // Dynamic Logic
-        scaleConfig = {
-            max: max,
-            t1: max * 0.50,
-            t2: max * 0.75,
-            t3: max * 0.90
-        };
-        // Manual overrides
+        scaleConfig = { max: max, t1: max * 0.50, t2: max * 0.75, t3: max * 0.90 };
         if (max === 4) scaleConfig = { max: 4, t1: 2, t2: 3, t3: 3.8 };
         if (max === 5) scaleConfig = { max: 5, t1: 2.5, t2: 3.5, t3: 4.5 };
     }
@@ -533,29 +556,10 @@
         });
     }
 
-    function forceFixEncoding(str) {
-        if (!str) return "";
-        str = String(str);
-        const map = {'Ã©':'é','Ã£':'ã','Ã¡':'á','Ã§':'ç','Ãª':'ê','Ã³':'ó','Ã´':'ô','Ãº':'ú','Ã­':'í','Ã ':'à','Ãƒ':'Ã','Ã•':'Õ','PebÃ©':'Pebé'};
-        for (let k in map) str = str.split(k).join(map[k]);
-        try { str = decodeURIComponent(escape(str)); } catch(e){}
-        return str.trim();
-    }
-    function normalize(str) { return str ? String(str).trim().toUpperCase() : ""; }
-
-    function getStatusLabel(avg) {
-        if(avg < scaleConfig.t1) return { t: "MUITO ABAIXO", c: "#C0392B" };
-        if(avg < scaleConfig.t2) return { t: "ABAIXO", c: "#E67E22" };
-        if(avg < scaleConfig.t3) return { t: "ATENDE", c: "#2980B9" };
-        return { t: "ACIMA", c: "#27AE60" };
-    }
-
     function processData(rows) {
         if(!rows || rows.length < 2) throw new Error("Arquivo vazio");
-        
         const userScale = document.getElementById('scaleInput').value;
         setScaleConfig(userScale);
-
         const headers = rows[0].map(h => String(h).trim().toLowerCase());
         const getIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
         
@@ -563,7 +567,11 @@
         const idxGestor = getIdx(['gestor']);
         const idxCrit = getIdx(['compet', 'crit', 'comp']);
         const idxNota = getIdx(['nota', 'result']);
-        const idxTipo = getIdx(['tipo', 'avali']);
+        
+        // FIXED LOGIC: Strict Look for 'tipo' specifically, if not found, use Column P (index 15)
+        let idxTipo = getIdx(['tipo']); 
+        if (idxTipo === -1) idxTipo = 15; 
+        
         const idxPapel = getIdx(['papel']);
         const idxStatus = getIdx(['status']);
         const idxNome = getIdx(['nome', 'colaborador']);
@@ -587,10 +595,11 @@
             const status = forceFixEncoding(r[idxStatus]);
             const matricula = forceFixEncoding(r[idxMat]);
             const nome = forceFixEncoding(r[idxNome]);
-            const tipo = forceFixEncoding(r[idxTipo]);
+            const tipoRaw = forceFixEncoding(r[idxTipo]);
+            const tipo = tipoRaw.toLowerCase();
             
             if(status.toLowerCase() !== 'concluído' && status.toLowerCase() !== 'concluido') {
-                draftData.push({ nome: nome, tipo: tipo });
+                draftData.push({ nome: nome, tipo: tipoRaw });
                 return; 
             }
             
@@ -603,6 +612,7 @@
                     superintendencia: hasSuper ? forceFixEncoding(r[idxSuper]) : "Geral",
                     gestor: forceFixEncoding(r[idxGestor]),
                     criteriaScores: {}, sum: 0, count: 0, detailedScores: {},
+                    sumManager: 0, countManager: 0, 
                     hasSelf: false, hasManager: false
                 };
             }
@@ -610,17 +620,21 @@
             let val = parseFloat(String(r[idxNota]||"0").replace(',','.').replace('%',''));
 
             if(!isNaN(val)) {
+                if(!map[uid].detailedScores[crit]) map[uid].detailedScores[crit] = { final:0, self:null, manager:null };
+
                 map[uid].criteriaScores[crit] = val;
                 map[uid].sum += val; map[uid].count++;
-                if(!map[uid].detailedScores[crit]) map[uid].detailedScores[crit] = { final:0, self:0, manager:0 };
                 
-                if(tipo.toLowerCase().includes('auto')) {
+                // ROBUST SELF-EVAL DETECTION
+                if(tipo.includes('auto') || tipo.includes('self') || tipo.includes('próprio') || tipo.includes('proprio') || tipo.includes('colaborador')) {
                     map[uid].detailedScores[crit].self = val;
                     map[uid].hasSelf = true;
                 } else { 
                     map[uid].detailedScores[crit].manager = val; 
                     map[uid].detailedScores[crit].final = val; 
                     map[uid].hasManager = true;
+                    map[uid].sumManager += val;
+                    map[uid].countManager++;
                 }
                 allCriteria.add(crit);
             }
@@ -628,13 +642,13 @@
 
         rawData = Object.values(map).map(e => {
             e.avg = e.count > 0 ? (e.sum / e.count) : 0;
+            e.avgManager = e.countManager > 0 ? (e.sumManager / e.countManager) : 0; 
             e.scores = Object.entries(e.criteriaScores).map(([k,v]) => ({crit:k, nota:v})).sort((a,b) => a.nota - b.nota);
             return e;
         });
 
         filteredDataGlobal = [...rawData];
         
-        // SAVE SESSION
         const compName = document.getElementById('headerLogo').innerText;
         const logoSrc = document.getElementById('headerLogoImg').src;
         saveStateToSession(rawData, draftData, scaleConfig, hasSuper, compName, (logoSrc.startsWith('data') ? logoSrc : null));
@@ -646,6 +660,8 @@
 
     function initDashboard() {
         populateFilters();
+        updateLegends(); // Create legends
+        
         if(draftData.length > 0) {
             const draftMap = {};
             draftData.forEach(d => { if(!draftMap[d.nome]) draftMap[d.nome] = new Set(); draftMap[d.nome].add(d.tipo); });
@@ -809,10 +825,13 @@
         document.getElementById('pageIndicator').innerText = currentPage;
         
         const tbody = document.getElementById('tbodyPart');
-        tbody.innerHTML = '';
+        let htmlRows = '';
+        
+        const fmt = (v) => (v === null || v === undefined) ? '<span style="color:#999; font-style:italic; font-size:0.8em;">Não avaliado</span>' : v.toFixed(2);
+        
         pageData.forEach((p, idx) => {
              const st = getStatusLabel(p.avg);
-             const focus = p.avg >= scaleConfig.t3 ? p.scores[p.scores.length-1] : p.scores[0];
+             const focus = p.avg >= scaleConfig.t3 ? (p.scores.length > 0 ? p.scores[p.scores.length-1] : {crit:'N/A', nota:0}) : (p.scores.length > 0 ? p.scores[0] : {crit:'N/A', nota:0});
              const pdi = generatePDI(focus.crit, focus.nota, p.avg >= scaleConfig.t3, p.gestor);
              
              let alertMissing = "";
@@ -823,47 +842,87 @@
                  alertMissing = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; margin-bottom:10px; font-weight:bold; font-size:0.8rem;"><i class="fas fa-exclamation-triangle"></i> Atenção: Média parcial. Falta: ${missing.join(", ")}</div>`;
              }
 
-             const tr = `<tr><td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td><td><strong>${p.nome}</strong><br><small>${p.cargo}</small></td><td>${p.gestor}<br><small>${p.dept}</small></td><td><div class="status-label" style="color:${st.c}">${st.t}</div><span class="badge" style="background:${st.c}20; color:${st.c}">${p.avg.toFixed(2)}</span></td><td>${pdi}</td><td><button class="btn-action no-print" onclick="downloadParticipantPDF('${p.uid}')"><i class="fas fa-file-pdf"></i> Dossiê</button></td></tr><tr id="row-${idx}" class="row-detail"><td colspan="6" style="padding:20px;"><div class="detail-flex">${alertMissing}<div class="detail-table"><h4>Detalhamento de Notas</h4><table>${p.scores.map(s=>`<tr><td>${s.crit}</td><td>${s.nota.toFixed(2)}</td></tr>`).join('')}</table></div><div class="detail-charts" style="width:100%"><div class="detail-chart-box"><h5>Comparativo (Auto vs Gestor)</h5><div class="radar-wrapper"><div class="radar-container"><canvas id="rad-${idx}"></canvas></div></div></div></div></div></td></tr>`;
-             tbody.innerHTML += tr;
-             setTimeout(() => {
-                 new Chart(document.getElementById(`rad-${idx}`), {
-                     type: 'radar',
-                     data: { labels: Object.keys(p.detailedScores), datasets: [{label:'Auto', data:Object.values(p.detailedScores).map(x=>x.self), borderColor:'#F39C12', backgroundColor:'transparent'}, {label:'Gestor', data:Object.values(p.detailedScores).map(x=>x.manager), borderColor:'#00849C', backgroundColor:'rgba(0,132,156,0.1)'}] },
-                     options: { layout: { padding: 20 }, scales: {r:{min:0, max: scaleConfig.max}} }
-                 });
-             }, 100);
+             htmlRows += `<tr>
+                <td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td>
+                <td><strong>${p.nome}</strong><br><small>${p.cargo}</small></td>
+                <td>${p.gestor}<br><small>${p.dept}</small></td>
+                <td>
+                    <div class="status-label" style="color:${st.c}">${st.t}</div>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <span class="badge" style="background:${st.c}20; color:${st.c}" title="Média Geral">${p.avg.toFixed(2)}</span>
+                        <span class="badge" style="background:#e3f2fd; color:#0F4C75" title="Média Gestor (100%)">G: ${p.avgManager.toFixed(2)}</span>
+                    </div>
+                </td>
+                <td>${pdi}</td>
+                <td><button class="btn-action no-print" onclick="downloadParticipantPDF('${p.uid}')"><i class="fas fa-file-pdf"></i> Dossiê</button></td>
+             </tr>
+             <tr id="row-${idx}" class="row-detail">
+                <td colspan="6" style="padding:20px;">
+                    <div class="detail-flex">
+                        ${alertMissing}
+                        <div class="detail-table">
+                            <h4>Detalhamento de Notas</h4>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="font-size:0.75rem;">Competência</th>
+                                        <th style="font-size:0.75rem;">Autoavaliação</th>
+                                        <th style="font-size:0.75rem;">Gestor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${p.scores.map(s => {
+                                        const det = p.detailedScores[s.crit] || { self: null, manager: null };
+                                        return `<tr>
+                                            <td>${s.crit}</td>
+                                            <td>${fmt(det.self)}</td>
+                                            <td>${fmt(det.manager)}</td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="detail-charts" style="width:100%">
+                            <div class="detail-chart-box">
+                                <h5>Comparativo (Auto vs Gestor)</h5>
+                                <div class="radar-wrapper"><div class="radar-container"><canvas id="rad-${idx}"></canvas></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+             </tr>`;
         });
-    }
+        
+        tbody.innerHTML = htmlRows;
 
-    function generatePDI(crit, nota, isHigh, gestor) {
-        const det = criteriaDetails[crit.toUpperCase()] || {desc: "Competência Essencial", behaviors: "Melhorar desempenho geral."};
-        if(isHigh) {
-            return `<div style="background:#E8F5E9; padding:12px; border-radius:8px; font-size:0.85rem;">
-            <strong>🚀 Expansão: ${crit}</strong> (${det.desc})
-            <ul style="margin:5px 0 5px 15px;">
-                <li><strong>70% (Prática):</strong> Liderar squad focado em inovação de processos usando ${crit}. Mentorar novos colaboradores.</li>
-                <li><strong>20% (Troca):</strong> Benchmark externo com empresas referência e apresentação de insights para a diretoria.</li>
-                <li><strong>10% (Formal):</strong> MBA ou Especialização Avançada.</li>
-            </ul>
-            <strong>🎯 SMART:</strong> "Aumentar a eficiência do setor em 15% aplicando ${crit} em novos projetos até o final do ano."</div>`;
-        } else {
-            return `<div style="background:#FFF3E0; padding:12px; border-radius:8px; font-size:0.85rem;">
-            <strong>🛠️ Recuperação: ${crit}</strong> (${det.desc})
-            <ul style="margin:5px 0 5px 15px;">
-                <li><strong>70% (Prática):</strong> Executar plano de ação corretivo com supervisão diária. Realizar entregas críticas em par (Pairing).</li>
-                <li><strong>20% (Troca):</strong> Feedback semanal estruturado com ${gestor} focado em evidências de mudança comportamental.</li>
-                <li><strong>10% (Formal):</strong> Releitura e prova de conhecimento dos manuais internos e políticas da área.</li>
-            </ul>
-            <strong>🎯 SMART:</strong> "Eliminar 100% dos erros operacionais em ${crit} e atingir nota mínima de ${scaleConfig.t2} em 3 meses."</div>`;
-        }
+        setTimeout(() => {
+            pageData.forEach((p, idx) => {
+                const ctx = document.getElementById(`rad-${idx}`);
+                if(ctx) {
+                    try {
+                        new Chart(ctx, {
+                            type: 'radar',
+                            data: { labels: Object.keys(p.detailedScores), datasets: [{label:'Auto', data:Object.values(p.detailedScores).map(x=>x.self), borderColor:'#F39C12', backgroundColor:'transparent'}, {label:'Gestor', data:Object.values(p.detailedScores).map(x=>x.manager), borderColor:'#00849C', backgroundColor:'rgba(0,132,156,0.1)'}] },
+                            options: { layout: { padding: 20 }, scales: {r:{min:0, max: scaleConfig.max}} }
+                        });
+                    } catch(e){ console.log("Chart render error", e); }
+                }
+            });
+        }, 300);
     }
-
+    
     function downloadParticipantPDF(uid) {
         const p = rawData.find(x => x.uid === uid);
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         doc.setFontSize(18); doc.text(`Dossiê: ${p.nome}`, 14, 20);
         doc.setFontSize(11); doc.text(`Cargo: ${p.cargo} | Média: ${p.avg.toFixed(2)}`, 14, 30);
-        doc.autoTable({ startY: 40, head: [['Competência', 'Nota']], body: p.scores.map(s => [s.crit, s.nota.toFixed(2)]) });
+        
+        const bodyData = p.scores.map(s => {
+             const det = p.detailedScores[s.crit] || {};
+             return [s.crit, (det.self ? det.self.toFixed(2) : '-'), (det.manager ? det.manager.toFixed(2) : '-')];
+        });
+        
+        doc.autoTable({ startY: 40, head: [['Competência', 'Auto', 'Gestor']], body: bodyData });
         doc.save(`Dossie_${p.nome}.pdf`);
     }
 
@@ -1017,11 +1076,26 @@
     function toggleDetails(id) { const el=document.getElementById(id); el.style.display=el.style.display==='table-row'?'none':'table-row'; }
     function clearGlobalFilters() { document.getElementById('globalSuper').value = 'all'; applyGlobalFilters('super'); }
     function clearPartFilters() { document.getElementById('fCargo').value = 'all'; applyPartFilters(); }
+    
+    // NAVIGATION FIX
     function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
-        document.getElementById('tab-'+id).classList.add('active');
-        event.target.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+        
+        const content = document.getElementById('tab-' + id);
+        if(content) content.classList.add('active');
+
+        if (event && event.target) {
+            const btn = event.target.closest('.nav-btn');
+            if (btn) btn.classList.add('active');
+        }
+
+        // FORÇAR RENDERIZAÇÃO
+        if(id === 'performance') { setTimeout(updatePerformanceFilters, 50); } 
+        else if (id === 'participantes') { applyPartFilters(); } 
+        else if (id === 'gestao') { updateGestaoFilters(); } 
+        else if (id === 'heatmap') { applyHeatmapFilters(); } 
+        else if (id === 'geral') { updateVisaoGeral(); }
     }
 </script>
 </body>
