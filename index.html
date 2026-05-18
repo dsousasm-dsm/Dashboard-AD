@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Estratégico | Avaliação de Performance</title>
+    <title>Dashboard 360º | Avaliação de Performance</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -159,7 +159,7 @@
 <div id="uploadScreen" class="upload-overlay">
     <div class="upload-box">
         <div style="margin-bottom: 20px; color: var(--primary); font-size: 3rem;"><i class="fas fa-chart-line"></i></div>
-        <h1 style="color: var(--dark); margin-bottom: 10px; font-weight: 800;">Analytics de Performance</h1>
+        <h1 style="color: var(--dark); margin-bottom: 10px; font-weight: 800;">Analytics de Performance 360º</h1>
         <p style="color: var(--text-light); margin-bottom: 10px;">Faça o upload dos dados para gerar o dashboard executivo.</p>
         <p style="color: var(--danger); font-size: 0.9rem; font-weight:700; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i> Atenção: O arquivo deve estar obrigatoriamente em formato .CSV</p>
         
@@ -199,14 +199,10 @@
         <div class="brand-area">
             <img id="headerLogoImg" class="company-logo-img">
             <div id="headerLogo" class="company-logo-text">EMPRESA</div>
-            <div class="dashboard-title">Dashboard Estratégico | Avaliação de Performance</div>
+            <div class="dashboard-title">Dashboard Estratégico | Avaliação 360º</div>
         </div>
         
         <div class="header-controls no-print">
-            <div class="header-filter-group" id="grpFilterSuper">
-                <label>Superintendência</label>
-                <select id="globalSuper" class="header-select" onchange="applyGlobalFilters('super')"><option value="all">Todas</option></select>
-            </div>
             <div class="header-filter-group">
                 <label>Gestor</label>
                 <select id="globalGestor" class="header-select" onchange="applyGlobalFilters('gestor')"><option value="all">Todos</option></select>
@@ -237,23 +233,23 @@
             <div class="info-grid">
                 <div class="info-box"><h4 id="cntCargos">0</h4><span>💼 Cargos Únicos</span></div>
                 <div class="info-box"><h4 id="cntDept">0</h4><span>🏢 Departamentos</span></div>
-                <div class="info-box" id="boxSuper"><h4 id="cntSuper">0</h4><span>🏛️ Superintendências</span></div>
                 <div class="info-box"><h4 id="cntGestores">0</h4><span>👥 Gestores</span></div>
+                <div class="info-box"><h4 id="cntTotalAv">0</h4><span>📝 Avaliações Realizadas</span></div>
             </div>
 
             <div class="kpi-grid">
                 <div class="kpi-card"><div class="kpi-lbl">Total Participantes (Concluídos)</div><div class="kpi-val" id="kpiTotal">0 🧑‍🤝‍🧑</div></div>
                 <div class="kpi-card"><div class="kpi-lbl">Média Global de Competências</div><div class="kpi-val" id="kpiMedia">0.0 📊</div></div>
                 
-                <div class="kpi-card" style="border-left-color: var(--success);"><div class="kpi-lbl">Melhor Competência</div><div class="kpi-val" id="kpiBestComp">- 🏆</div></div>
-                <div class="kpi-card" style="border-left-color: var(--warning);"><div class="kpi-lbl">Menor Competência</div><div class="kpi-val" id="kpiWorstComp">- 📉</div></div>
+                <div class="kpi-card" style="border-left-color: var(--success);"><div class="kpi-lbl">Melhor Competência (Global)</div><div class="kpi-val" id="kpiBestComp">- 🏆</div></div>
+                <div class="kpi-card" style="border-left-color: var(--warning);"><div class="kpi-lbl">Menor Competência (Global)</div><div class="kpi-val" id="kpiWorstComp">- 📉</div></div>
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <h3><i class="fas fa-chart-pie"></i> Distribuição Percentual de Colaboradores</h3>
                 </div>
-                <p class="chart-explanation">Este gráfico representa a categorização dos colaboradores baseada na <strong>Média GERAL (Autoavaliação + Gestor)</strong>, seguindo a régua da empresa.</p>
+                <p class="chart-explanation">Este gráfico representa a categorização dos colaboradores baseada na <strong>Média Geral (100% Gestor)</strong>, seguindo a régua da empresa.</p>
                 <div class="chart-container" style="height: 300px;">
                     <canvas id="chartDistributionGeral"></canvas>
                 </div>
@@ -261,20 +257,15 @@
             </div>
 
             <div class="chart-row-vertical" style="margin-top:20px;">
-                <div class="card" id="cardChartSuper">
-                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média por Superintendência (ou Detalhe)</h3></div>
-                    <div id="containerSuper" class="chart-container"><canvas id="chartSuper"></canvas></div>
-                    <div class="data-table-container"><table id="tableSuper"><thead><tr><th>Nome</th><th>Média</th></tr></thead><tbody></tbody></table></div>
-                </div>
                 <div class="card">
                     <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média por Departamento</h3></div>
                     <div id="containerDept" class="chart-container"><canvas id="chartDept"></canvas></div>
-                    <div class="data-table-container"><table id="tableDept"><thead><tr><th>Nome</th><th>Média</th></tr></thead><tbody></tbody></table></div>
+                    <div class="data-table-container"><table id="tableDept"><thead><tr><th>Nome</th><th>Média Geral</th></tr></thead><tbody></tbody></table></div>
                 </div>
                 <div class="card">
                     <div class="card-header"><h3><i class="fas fa-chart-line"></i> Média por Cargo</h3></div>
                     <div id="containerCargo" class="chart-container"><canvas id="chartCargo"></canvas></div>
-                    <div class="data-table-container"><table id="tableCargo"><thead><tr><th>Nome</th><th>Média</th></tr></thead><tbody></tbody></table></div>
+                    <div class="data-table-container"><table id="tableCargo"><thead><tr><th>Nome</th><th>Média Geral</th></tr></thead><tbody></tbody></table></div>
                 </div>
             </div>
 
@@ -284,7 +275,7 @@
                     <div class="filter-group"><label>Filtrar por Papel (Gestor/Colaborador):</label><select id="gargaloPapel" onchange="updateGargaloFilters()"><option value="all">Todos</option></select></div>
                 </div>
                 <div id="gargaloInsight" class="insight-box" style="display:none;"></div>
-                <div id="containerGargalo" class="chart-container"><canvas id="chartGargalos"></canvas></div>
+                <div class="chart-container" style="height: 500px;"><canvas id="chartGargalos"></canvas></div>
             </div>
         </div>
 
@@ -295,37 +286,30 @@
                     <div class="filter-group"><label>Cargo</label><select id="fCargo" onchange="applyPartFilters()"><option value="all">Todas</option></select></div>
                     <div class="filter-group"><label>Status Nota</label><select id="fNota" onchange="applyPartFilters(true)">
                         <option value="all">Todas</option>
-                        <option value="range1">Muito Abaixo</option>
-                        <option value="range2">Abaixo</option>
-                        <option value="range3">Atende</option>
-                        <option value="range4">Acima</option>
+                        <option value="range1">Não atende</option>
+                        <option value="range2">Atende parcialmente</option>
+                        <option value="range3">Atende plenamente</option>
+                        <option value="range4">Supera</option>
                     </select></div>
                     <div class="filter-group"><label>Busca Rápida</label><input type="text" id="fSearch" placeholder="Nome ou Matrícula..." onkeyup="applyPartFilters()"></div>
                     <div style="margin-left: auto; align-self: center; font-weight:bold; color:var(--primary);"><span id="resultCount">0</span> encontrados</div>
                 </div>
                 
                 <div id="scaleLegendPart" class="scale-legend"></div>
-                <div style="font-size:0.8rem; color:#666; margin-left:15px; margin-bottom:15px; font-style:italic;">Nota: A média considera apenas a avaliação do Gestor (100% peso).</div>
+                <div style="font-size:0.8rem; color:#666; margin-left:15px; margin-bottom:15px; font-style:italic;">Nota: A Média Geral considera 100% a avaliação do Gestor. As notas dos demais avaliadores são apenas para consulta.</div>
 
                 <div style="overflow-x:auto;">
                     <table id="tablePart">
-                        <thead><tr><th width="50" class="no-print">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Médias</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th class="no-print">Ação</th></tr></thead>
+                        <thead><tr><th width="50" class="no-print">Detalhe</th><th>Colaborador</th><th>Estrutura</th><th>Média Geral</th><th style="width:40%">Plano de Desenvolvimento (PDI)</th><th class="no-print">Ação</th></tr></thead>
                         <tbody id="tbodyPart"></tbody>
                     </table>
                 </div>
-                <div class="pagination-container no-print"><button class="btn-page" onclick="changePage(-1)">Anterior</button><span id="pageIndicator" class="page-info">1</span><button class="btn-page" onclick="changePage(1)">Próximo</button></div>
+                <div class="pagination-container no-print"><button class="btn-page" onclick="changePage(-1)">Anterior</button><span id="pageIndicator" class="page-info">1 / 1</span><button class="btn-page" onclick="changePage(1)">Próximo</button></div>
             </div>
         </div>
 
         <div id="tab-performance" class="tab-content">
             <div class="card">
-                <div class="card-header" style="justify-content:center;"><h3><i class="fas fa-layer-group"></i> Distribuição de Conceitos (1-4) por Superintendência</h3></div>
-                <div style="display:flex; justify-content:center; padding: 20px;">
-                    <div style="height: 450px; width: 95%; max-width: 1000px;"><canvas id="chartConcepts"></canvas></div>
-                </div>
-            </div>
-
-            <div class="card" style="margin-top: 20px;">
                  <div class="card-header"><h3><i class="fas fa-list-ol"></i> Ranking de Colaboradores (Filtro Atual)</h3></div>
                  <div class="chart-container" style="height: 600px;"><canvas id="chartRanking"></canvas></div>
             </div>
@@ -401,25 +385,21 @@
        "TER ATENÇÃO AOS RESULTADOS - COMPORTAMENTO": { desc: "Foco no coletivo.", behaviors: "Priorização do resultado organizacional." }
     };
 
-    // GLOBAL VARIABLES - SET DEFAULT 1-4 HERE TO BE SAFE
+    // GLOBAL VARIABLES
     let rawData = [], draftData = [], currentFilteredData = [];
-    // Heatmap filtering logic specific (even if removed, good to keep structure for stability)
-    let filteredHeatCollaborators = [];
-    
     let charts = {}, currentManagerData = null;
     let allCriteria = new Set();
     let currentPage = 1;
     const itemsPerPage = 15;
-    let hasSuper = true; 
     let scaleConfig = { max: 4, t1: 1.75, t2: 2.50, t3: 3.50 }; // Default 1-4 HARDCODED
-    let showOnlyAttention = false;
+    let totalEvalsCount = 0;
 
-    // HELPER FUNCTIONS
+    // HELPER FUNCTIONS (Escala Atualizada)
     function getStatusLabel(avg) {
-        if(avg < 1.75) return { t: "MUITO ABAIXO", c: "#8B0000" };
-        if(avg < 2.50) return { t: "ABAIXO", c: "#DC3545" };
-        if(avg < 3.50) return { t: "ATENDE", c: "#E67E22" };
-        return { t: "ACIMA", c: "#28A745" };
+        if(avg < 1.75) return { t: "NÃO ATENDE", c: "#8B0000" };
+        if(avg < 2.50) return { t: "ATENDE PARCIALMENTE", c: "#DC3545" };
+        if(avg < 3.50) return { t: "ATENDE PLENAMENTE", c: "#E67E22" };
+        return { t: "SUPERA", c: "#28A745" };
     }
 
     function generatePDI(crit, nota, isHigh, gestor) {
@@ -439,14 +419,14 @@
             <ul style="margin:5px 0 5px 15px;">
                 <li><strong>Fraquezas:</strong> Dificuldade em evidenciar os comportamentos esperados (${det.desc}).</li>
                 <li><strong>Ameaças:</strong> Impacto negativo nos KPIs da área e sobrecarga da equipe.</li>
-                <li><strong>Oportunidades:</strong> Crescimento rápido através de acompanhamento próximo com ${gestor}.</li>
+                <li><strong>Oportunidades:</strong> Crescimento rápido através de acompanhamento próximo.</li>
             </ul>
             <strong>Ação:</strong> "Iniciar ciclo de feedback quinzenal focado em evidências práticas."</div>`;
         }
     }
 
     function fmt(v) {
-        return (v === null || v === undefined) ? '<span style="color:#999; font-style:italic; font-size:0.8em;">Não avaliado</span>' : v.toFixed(2);
+        return (v === null || v === undefined) ? '<span style="color:#999; font-style:italic; font-size:0.8em;">-</span>' : v.toFixed(2);
     }
     
     function forceFixEncoding(str) {
@@ -461,10 +441,10 @@
     
     function updateLegends() {
         const legendHTML = `
-            <div class="legend-item"><span class="legend-dot" style="background:#8B0000;"></span> Muito Abaixo (< 1,75)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#DC3545;"></span> Abaixo (1,75 a 2,49)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#FFC107;"></span> Atende (2,50 a 3,49)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#28A745;"></span> Acima (3,50 a 4,00)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#8B0000;"></span> Não atende (< 1,75)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#DC3545;"></span> Atende parcialmente (1,75 a 2,49)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#FFC107;"></span> Atende plenamente (2,50 a 3,49)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#28A745;"></span> Supera (3,50 a 4,00)</div>
         `;
         const legendContainer = document.getElementById('scaleLegendPart');
         if (legendContainer) {
@@ -475,9 +455,9 @@
     // --- SESSION ---
     window.onload = function() { loadStateFromSession(); };
 
-    function saveStateToSession(data, draft, scale, superFlag, companyName, logoData) {
+    function saveStateToSession(data, draft, scale, companyName, logoData, totalEvals) {
         try {
-            const state = { rawData: data, draftData: draft, scaleConfig: scale, hasSuper: superFlag, companyName: companyName, logoData: logoData };
+            const state = { rawData: data, draftData: draft, scaleConfig: scale, companyName: companyName, logoData: logoData, totalEvals: totalEvals };
             sessionStorage.setItem('dashboardState', JSON.stringify(state));
         } catch(e) { console.log("Storage failed", e); }
     }
@@ -487,10 +467,10 @@
         if(saved) {
             try {
                 const state = JSON.parse(saved);
-                rawData = state.rawData; draftData = state.draftData; scaleConfig = state.scaleConfig; hasSuper = state.hasSuper;
+                rawData = state.rawData; draftData = state.draftData; scaleConfig = state.scaleConfig; totalEvalsCount = state.totalEvals || 0;
                 if(state.companyName) document.getElementById('headerLogo').innerText = state.companyName;
                 if(state.logoData) { const img = document.getElementById('headerLogoImg'); img.src = state.logoData; img.style.display = 'block'; }
-                if (!hasSuper) { document.getElementById('grpFilterSuper').style.display = 'none'; document.getElementById('cardChartSuper').style.display = 'none'; document.getElementById('boxSuper').style.display = 'none'; }
+                
                 document.getElementById('uploadScreen').style.display = 'none';
                 document.getElementById('mainInterface').classList.remove('hidden');
                 filteredDataGlobal = [...rawData];
@@ -522,7 +502,7 @@
                 const img = document.getElementById('headerLogoImg');
                 img.src = e.target.result;
                 img.style.display = 'block';
-                saveStateToSession(rawData, draftData, scaleConfig, hasSuper, name, e.target.result);
+                saveStateToSession(rawData, draftData, scaleConfig, name, e.target.result, totalEvalsCount);
             };
             reader.readAsDataURL(logoFile);
         }
@@ -558,7 +538,6 @@
         const headers = rows[0].map(h => String(h).trim().toLowerCase());
         const getIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
         
-        let idxSuper = getIdx(['superintend', 'supt']);
         const idxGestor = getIdx(['gestor']);
         const idxCrit = getIdx(['compet', 'crit', 'comp']);
         const idxNota = getIdx(['nota', 'result']);
@@ -572,18 +551,13 @@
         const idxCargo = getIdx(['cargo']);
         const idxDept = getIdx(['dept', 'depar']);
         
-        if (idxSuper === -1) {
-            hasSuper = false;
-            document.getElementById('grpFilterSuper').style.display = 'none';
-            document.getElementById('cardChartSuper').style.display = 'none';
-            document.getElementById('boxSuper').style.display = 'none';
-        }
-
         rows.shift();
         const map = {};
         draftData = [];
+        totalEvalsCount = 0;
+        let uniqueEvals = new Set();
         
-        rows.forEach(r => {
+        rows.forEach((r, rowIdx) => {
             if (!r || r.length < 5) return;
             const status = forceFixEncoding(r[idxStatus]);
             const matricula = forceFixEncoding(r[idxMat]);
@@ -597,61 +571,99 @@
             }
             
             if(!nome) return;
+            
             const uid = normalize(matricula) + "_" + normalize(nome);
+            let evalKey = uid + "_" + tipoRaw + "_" + (r[0] || rowIdx);
+            uniqueEvals.add(evalKey);
+
             if(!map[uid]) {
                 map[uid] = {
-                    uid: uid, cpf: forceFixEncoding(r[0]), matricula: matricula, nome: nome,
-                    cargo: forceFixEncoding(r[idxCargo]), papel: forceFixEncoding(r[idxPapel]), unit: forceFixEncoding(r[7]), dept: forceFixEncoding(r[idxDept]),
-                    superintendencia: hasSuper ? forceFixEncoding(r[idxSuper]) : "Geral",
+                    uid: uid, matricula: matricula, nome: nome,
+                    cargo: forceFixEncoding(r[idxCargo]), papel: forceFixEncoding(r[idxPapel]), dept: forceFixEncoding(r[idxDept]),
                     gestor: forceFixEncoding(r[idxGestor]),
-                    criteriaScores: {}, sum: 0, count: 0, detailedScores: {},
-                    sumManager: 0, countManager: 0, 
-                    hasSelf: false, hasManager: false,
+                    detailedScores: {},
+                    hasSelf: false, hasManager: false, hasLiderado: false, hasCliente: false,
                     globalSum: 0, globalCount: 0 
                 };
             }
+            
             const crit = forceFixEncoding(r[idxCrit]) || 'Geral';
-            let val = parseFloat(String(r[idxNota]||"0").replace(',','.').replace('%',''));
+            // IGNORAR SE NÃO TIVER NOTA (Corrige a média)
+            let notaStr = String(r[idxNota] || "").trim();
+            if (notaStr === "" || notaStr === "-") return;
+            
+            let val = parseFloat(notaStr.replace(',','.').replace('%',''));
 
-            if(!isNaN(val)) {
-                if(!map[uid].detailedScores[crit]) map[uid].detailedScores[crit] = { final:0, self:null, manager:null };
+            // SE A NOTA FOR VALIDA E MAIOR QUE ZERO, PROCESSA
+            if(!isNaN(val) && val > 0) {
+                if(!map[uid].detailedScores[crit]) {
+                    map[uid].detailedScores[crit] = {
+                        self: { sum: 0, count: 0 },
+                        manager: { sum: 0, count: 0 },
+                        liderado: { sum: 0, count: 0 },
+                        cliente: { sum: 0, count: 0 }
+                    };
+                }
+                const det = map[uid].detailedScores[crit];
 
-                map[uid].criteriaScores[crit] = val;
-                map[uid].sum += val; map[uid].count++;
-                
-                if(tipo.includes('auto') || tipo.includes('self') || tipo.includes('próprio') || tipo.includes('proprio') || tipo.includes('colaborador')) {
-                    map[uid].detailedScores[crit].self = val;
-                    map[uid].hasSelf = true;
+                // CATEGORIZE THE 360 TYPES
+                if(tipo.includes('auto') || tipo.includes('self') || tipo.includes('próprio') || tipo.includes('proprio')) {
+                    det.self.sum += val; det.self.count++; map[uid].hasSelf = true;
+                } else if (tipo.includes('liderado') || tipo.includes('subordinado') || tipo.includes('equipe')) {
+                    det.liderado.sum += val; det.liderado.count++; map[uid].hasLiderado = true;
+                } else if (tipo.includes('cliente') || tipo.includes('interno') || tipo.includes('par')) {
+                    det.cliente.sum += val; det.cliente.count++; map[uid].hasCliente = true;
                 } else { 
-                    map[uid].detailedScores[crit].manager = val; 
-                    map[uid].detailedScores[crit].final = val; 
-                    map[uid].hasManager = true;
-                    map[uid].sumManager += val;
-                    map[uid].countManager++;
+                    // Default to manager
+                    det.manager.sum += val; det.manager.count++; map[uid].hasManager = true;
                 }
                 
-                // GLOBAL TRACKING
+                // Track GLOBAL sum and count (For ALL evaluated criteria)
                 map[uid].globalSum += val;
                 map[uid].globalCount++;
 
                 allCriteria.add(crit);
             }
         });
+        
+        totalEvalsCount = uniqueEvals.size;
 
-        rawData = Object.values(map).map(e => {
-            e.avg = e.countManager > 0 ? (e.sumManager / e.countManager) : 0;
-            e.avgManager = e.avg; 
-            
-            // Global Avg (Self + Manager)
-            e.avgGlobal = e.globalCount > 0 ? (e.globalSum / e.globalCount) : 0;
-            
-            let mScores = [];
+        // FILTRA FANTASMAS: Só entra quem teve globalCount > 0
+        rawData = Object.values(map).filter(e => e.globalCount > 0).map(e => {
+            let finalSum = 0;
+            let finalCount = 0;
+            e.compScores = {};
+
             for (const [c, det] of Object.entries(e.detailedScores)) {
-                if(det.manager !== null) {
-                    mScores.push({crit: c, nota: det.manager});
+                let mAvg = det.manager.count ? det.manager.sum / det.manager.count : null;
+                let sAvg = det.self.count ? det.self.sum / det.self.count : null;
+                let lAvg = det.liderado.count ? det.liderado.sum / det.liderado.count : null;
+                let ciAvg = det.cliente.count ? det.cliente.sum / det.cliente.count : null;
+
+                // MÉDIA FINAL DA COMPETÊNCIA (Gestor 100%, os outros 0% na visão global)
+                let finalAvg = mAvg !== null ? mAvg : 0;
+
+                e.compScores[c] = finalAvg;
+                
+                e.detailedScores[c] = {
+                    manager: mAvg,
+                    self: sAvg,
+                    liderado: lAvg,
+                    cliente: ciAvg,
+                    final: finalAvg
+                };
+
+                if(mAvg !== null) {
+                    finalSum += mAvg;
+                    finalCount++;
                 }
             }
-            e.scores = mScores.sort((a,b) => a.nota - b.nota);
+
+            e.avg = finalCount > 0 ? (finalSum / finalCount) : 0;
+            e.avgGlobal = e.avg; // Aligning Global Average to be 100% Manager as requested
+            
+            e.scores = Object.entries(e.compScores).map(([k,v]) => ({crit: k, nota: v})).sort((a,b) => a.nota - b.nota);
+            
             return e;
         });
 
@@ -659,7 +671,7 @@
         
         const compName = document.getElementById('headerLogo').innerText;
         const logoSrc = document.getElementById('headerLogoImg').src;
-        saveStateToSession(rawData, draftData, scaleConfig, hasSuper, compName, (logoSrc.startsWith('data') ? logoSrc : null));
+        saveStateToSession(rawData, draftData, scaleConfig, compName, (logoSrc.startsWith('data') ? logoSrc : null), totalEvalsCount);
 
         document.getElementById('uploadScreen').style.display = 'none';
         document.getElementById('mainInterface').classList.remove('hidden');
@@ -680,7 +692,6 @@
     }
 
     function populateFilters() {
-        if(hasSuper) { const uSuper = [...new Set(rawData.map(d=>d.superintendencia))].sort(); fillSelect('globalSuper', uSuper); }
         fillSelect('globalGestor', [...new Set(rawData.map(d=>d.gestor))].sort());
         fillSelect('globalDept', [...new Set(rawData.map(d=>d.dept))].sort());
         fillSelect('gargaloPapel', [...new Set(rawData.map(d=>d.papel))].filter(p=>p).sort());
@@ -697,29 +708,21 @@
     }
 
     function applyGlobalFilters(source) {
-        const vSuper = document.getElementById('globalSuper').value;
         const vGestor = document.getElementById('globalGestor').value;
         const vDept = document.getElementById('globalDept').value;
         let subset = rawData;
         
-        if(hasSuper && vSuper !== 'all') subset = subset.filter(d => d.superintendencia === vSuper);
         if(vGestor !== 'all') subset = subset.filter(d => d.gestor === vGestor);
         if(vDept !== 'all') subset = subset.filter(d => d.dept === vDept);
         
-        if(source === 'super' && hasSuper) {
-             document.getElementById('globalGestor').value = 'all'; document.getElementById('globalDept').value = 'all';
-             const subSuper = (vSuper !== 'all') ? rawData.filter(d=>d.superintendencia === vSuper) : rawData;
-             fillSelect('globalGestor', [...new Set(subSuper.map(d=>d.gestor))].sort());
-             fillSelect('globalDept', [...new Set(subSuper.map(d=>d.dept))].sort());
-             subset = (vSuper !== 'all') ? rawData.filter(d=>d.superintendencia === vSuper) : rawData;
-        } else if (source === 'gestor') {
+        if (source === 'gestor') {
              document.getElementById('globalDept').value = 'all';
              fillSelect('globalDept', [...new Set(subset.map(d=>d.dept))].sort());
         }
 
         currentFilteredData = subset;
         updateVisaoGeral();
-        applyPartFilters();
+        applyPartFilters(false, false);
         updatePerformanceFilters();
         updateGestaoFilters();
     }
@@ -730,30 +733,31 @@
         const safeSet = (list) => new Set(list).size;
         document.getElementById('cntCargos').innerText = safeSet(data.map(i=>i.cargo));
         document.getElementById('cntDept').innerText = safeSet(data.map(i=>i.dept));
-        if(hasSuper) document.getElementById('cntSuper').innerText = safeSet(data.map(i=>i.superintendencia));
         document.getElementById('cntGestores').innerText = safeSet(data.map(i=>i.gestor));
+        document.getElementById('cntTotalAv').innerText = totalEvalsCount;
         
         document.getElementById('kpiTotal').innerText = data.length;
         
-        // ** ADJUSTMENT: MEDIA GLOBAL DE COMPETENCIAS (Gestor Only based on previous requirements) **
+        // Média Global de Competências (Manager Only based on previous requirements)
         const totalSum = data.reduce((a,b)=>a+b.avg,0);
         const avgTotal = data.length > 0 ? (totalSum / data.length) : 0;
         document.getElementById('kpiMedia').innerText = avgTotal.toFixed(2);
         
-        // ** REMOVED "ATTENTION" KPI AS REQUESTED **
-        
-        const critMap = {}; 
-        // Best/Worst uses average of Manager scores
+        // Melhor/Menor Competencia usa avg do Gestor
+        let critSums = {}; 
+        allCriteria.forEach(c => { critSums[c] = {s:0, n:0}; });
         data.forEach(p => {
              for(let c in p.detailedScores) {
-                 if(p.detailedScores[c].manager !== null) {
-                     if(!critMap[c]) critMap[c] = {s:0, n:0};
-                     critMap[c].s += p.detailedScores[c].manager;
-                     critMap[c].n++;
+                 if(p.detailedScores[c].manager !== null) { 
+                     critSums[c].s += p.detailedScores[c].manager; 
+                     critSums[c].n++; 
                  }
              }
         });
-        const sortedDesc = Object.entries(critMap).map(([k,v])=>({k,v:v.s/v.n})).sort((a,b)=>b.v-a.v);
+        
+        let validCrits = [];
+        for(let c in critSums) { if(critSums[c].n > 0) validCrits.push({k: c, v: critSums[c].s/critSums[c].n}); }
+        const sortedDesc = validCrits.sort((a,b)=>b.v-a.v);
         
         if(sortedDesc.length){
             document.getElementById('kpiBestComp').innerText = `${sortedDesc[0].k} (${sortedDesc[0].v.toFixed(2)})`;
@@ -762,22 +766,20 @@
         
         // --- RENDER BLOCK FOR CHARTS ---
         const renderBlock = (idChart, idTable, key) => {
-            if(key === 'superintendencia' && !hasSuper) return;
             const grouped = groupBy(data, key);
             createChart(idChart, 'bar', grouped.l, grouped.v, '#00849C');
             const tbody = document.getElementById(idTable).getElementsByTagName('tbody')[0];
             tbody.innerHTML = grouped.l.map((l, i) => `<tr><td>${l}</td><td>${grouped.v[i]}</td></tr>`).join('');
         };
-        renderBlock('chartSuper', 'tableSuper', 'superintendencia');
         renderBlock('chartDept', 'tableDept', 'dept');
         renderBlock('chartCargo', 'tableCargo', 'cargo');
         
-        // --- NEW DISTRIBUTION CHART (GLOBAL AVERAGE: Gestor + Auto) ---
+        // --- NEW DISTRIBUTION CHART (FINAL WEIGHTED AVERAGE = Manager) ---
         let countMA = 0, countA = 0, countAt = 0, countAc = 0;
         data.forEach(d => {
-            if(d.avgGlobal < 1.75) countMA++;
-            else if(d.avgGlobal < 2.50) countA++;
-            else if(d.avgGlobal < 3.50) countAt++;
+            if(d.avg < 1.75) countMA++;
+            else if(d.avg < 2.50) countA++;
+            else if(d.avg < 3.50) countAt++;
             else countAc++;
         });
         
@@ -786,7 +788,7 @@
         charts['dist'] = new Chart(ctxDist, {
             type: 'doughnut',
             data: {
-                labels: ['Muito Abaixo', 'Abaixo', 'Atende', 'Acima'],
+                labels: ['Não atende', 'Atende parcialmente', 'Atende plenamente', 'Supera'],
                 datasets: [{
                     data: [countMA, countA, countAt, countAc],
                     backgroundColor: ['#8B0000', '#DC3545', '#FFC107', '#28A745']
@@ -803,10 +805,10 @@
         
         const total = data.length || 1;
         document.getElementById('distLabels').innerHTML = `
-            <span style="color:#8B0000">Muito Abaixo: ${countMA} (${((countMA/total)*100).toFixed(1)}%)</span>
-            <span style="color:#DC3545">Abaixo: ${countA} (${((countA/total)*100).toFixed(1)}%)</span>
-            <span style="color:#E67E22">Atende: ${countAt} (${((countAt/total)*100).toFixed(1)}%)</span>
-            <span style="color:#28A745">Acima: ${countAc} (${((countAc/total)*100).toFixed(1)}%)</span>
+            <span style="color:#8B0000">Não atende: ${countMA} (${((countMA/total)*100).toFixed(1)}%)</span>
+            <span style="color:#DC3545">Atende parcialmente: ${countA} (${((countA/total)*100).toFixed(1)}%)</span>
+            <span style="color:#E67E22">Atende plenamente: ${countAt} (${((countAt/total)*100).toFixed(1)}%)</span>
+            <span style="color:#28A745">Supera: ${countAc} (${((countAc/total)*100).toFixed(1)}%)</span>
         `;
 
         updateGargaloFilters();
@@ -816,32 +818,20 @@
         const p = document.getElementById('gargaloPapel').value;
         const data = (p === 'all') ? currentFilteredData : currentFilteredData.filter(d => d.papel === p);
         
-        // FIX: Calculate GLOBAL Average (Self + Manager) for Gargalos
         let critSums = {};
-        
-        // Initialize ALL criteria to 0 to ensure they appear on chart
-        allCriteria.forEach(c => {
-             critSums[c] = {s:0, n:0};
-        });
+        allCriteria.forEach(c => { critSums[c] = {s:0, n:0}; });
 
         data.forEach(p => {
              for(let c in p.detailedScores) {
-                 // Check Self score
-                 if(p.detailedScores[c].self !== null) {
-                     critSums[c].s += p.detailedScores[c].self;
-                     critSums[c].n++;
-                 }
-                 // Check Manager score
-                 if(p.detailedScores[c].manager !== null) {
-                     critSums[c].s += p.detailedScores[c].manager;
-                     critSums[c].n++;
+                 if(p.detailedScores[c].manager !== null) { 
+                     critSums[c].s += p.detailedScores[c].manager; 
+                     critSums[c].n++; 
                  }
              }
         });
         
         let sortedAsc = [];
         for (let c in critSums) {
-            // Push all criteria, even if avg is 0
              let val = critSums[c].n > 0 ? (critSums[c].s / critSums[c].n) : 0;
              sortedAsc.push({k: c, v: val});
         }
@@ -867,7 +857,6 @@
              document.getElementById('gargaloInsight').style.display='block';
         }
         
-        // FIX: Ensure all labels show up by disabling autoSkip
         if(charts['chartGargalos']) charts['chartGargalos'].destroy();
         const ctx = document.getElementById('chartGargalos');
         if(!ctx) return;
@@ -876,7 +865,7 @@
             data: { 
                 labels: sortedAsc.map(x=>x.k), 
                 datasets:[{
-                    label:'Média Geral (Global)', 
+                    label:'Média Geral (Gestor)', 
                     data: sortedAsc.map(x=>x.v), 
                     borderColor: '#E74C3C', 
                     backgroundColor: '#E74C3C'
@@ -895,24 +884,25 @@
     }
 
     // --- TAB 2 PARTICIPANTES ---
-    function applyPartFilters(fromSelect = false) {
-        if(fromSelect) showOnlyAttention = false;
+    function changePage(d) {
+        currentPage += d;
+        applyPartFilters(false, true);
+    }
+
+    function applyPartFilters(fromSelect = false, isPageChange = false) {
+        if(!isPageChange) currentPage = 1;
         const c = document.getElementById('fCargo').value;
         const txt = document.getElementById('fSearch').value.toLowerCase();
         const n = document.getElementById('fNota').value;
         
         let data = currentFilteredData.filter(i => {
             let passScore = true;
-            if(showOnlyAttention) {
-                // Special view: GLOBAL Avg < 2.50
-                passScore = (i.avgGlobal < 2.50);
-            } else {
-                passScore = (n==='all' || 
-                            (n==='range1' && i.avg < 1.75) || 
-                            (n==='range2' && i.avg >= 1.75 && i.avg < 2.50) || 
-                            (n==='range3' && i.avg >= 2.50 && i.avg < 3.50) || 
-                            (n==='range4' && i.avg >= 3.50));
-            }
+            passScore = (n==='all' || 
+                        (n==='range1' && i.avg < 1.75) || 
+                        (n==='range2' && i.avg >= 1.75 && i.avg < 2.50) || 
+                        (n==='range3' && i.avg >= 2.50 && i.avg < 3.50) || 
+                        (n==='range4' && i.avg >= 3.50));
+            
             return passScore && (c==='all'||i.cargo===c) && (i.nome.toLowerCase().includes(txt) || i.matricula.toLowerCase().includes(txt));
         });
 
@@ -927,15 +917,20 @@
     }
     
     function renderTablePart(data) {
+        const totalPages = Math.ceil(data.length / itemsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
         const start = (currentPage-1)*itemsPerPage;
         const pageData = data.slice(start, start+itemsPerPage);
+        
         document.getElementById('resultCount').innerText = data.length;
-        document.getElementById('pageIndicator').innerText = currentPage;
+        document.getElementById('pageIndicator').innerText = currentPage + " / " + totalPages;
         
         const tbody = document.getElementById('tbodyPart');
         let htmlRows = '';
         
-        const fmt = (v) => (v === null || v === undefined) ? '<span style="color:#999; font-style:italic; font-size:0.8em;">Não avaliado</span>' : v.toFixed(2);
+        const fmt = (v) => (v === null || v === undefined || isNaN(v)) ? '<span style="color:#999; font-style:italic; font-size:0.8em;">-</span>' : v.toFixed(2);
         
         pageData.forEach((p, idx) => {
              const st = getStatusLabel(p.avg);
@@ -943,14 +938,16 @@
              const pdi = generatePDI(focus.crit, focus.nota, p.avg >= 3.50, p.gestor);
              
              let alertMissing = "";
-             if(!p.hasSelf || !p.hasManager) {
-                 let missing = [];
-                 if(!p.hasSelf) missing.push("Autoavaliação");
-                 if(!p.hasManager) missing.push("Gestor");
-                 alertMissing = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; margin-bottom:10px; font-weight:bold; font-size:0.8rem;"><i class="fas fa-exclamation-triangle"></i> Atenção: Média parcial. Falta: ${missing.join(", ")}</div>`;
+             let missing = [];
+             if(!p.hasSelf) missing.push("Autoavaliação");
+             if(!p.hasManager) missing.push("Gestor");
+             if(!p.hasLiderado) missing.push("Liderado");
+             if(!p.hasCliente) missing.push("Cliente Interno");
+
+             if(missing.length > 0) {
+                 alertMissing = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; margin-bottom:10px; font-weight:bold; font-size:0.8rem;"><i class="fas fa-exclamation-triangle"></i> Atenção: Avaliações Faltantes: ${missing.join(", ")}</div>`;
              }
 
-             // Logic for Media Display (Hide if no manager)
              let mediaDisplay = '';
              let statusDisplay = '';
              let pdiDisplay = '';
@@ -960,19 +957,22 @@
                  statusDisplay = '<span style="color:#999;">-</span>';
                  pdiDisplay = '<span style="color:#999; font-style:italic;">Aguardando nota do gestor para gerar PDI.</span>';
              } else {
-                 mediaDisplay = `<span class="badge" style="background:#e3f2fd; color:#0F4C75" title="Média Gestor (Final)">${p.avg.toFixed(2)}</span>`;
+                 mediaDisplay = `<span class="badge" style="background:#e3f2fd; color:#0F4C75" title="Média Geral">${p.avg.toFixed(2)}</span>`;
                  statusDisplay = `<div class="status-label" style="color:${st.c}">${st.t}</div>`;
                  pdiDisplay = pdi;
              }
              
-             // Calc specific averages for detailed header
-             let sumS=0, cntS=0, sumM=0, cntM=0;
+             let sumS=0, cntS=0, sumM=0, cntM=0, sumL=0, cntL=0, sumC=0, cntC=0;
              Object.values(p.detailedScores).forEach(v => {
                 if(v.self !== null) { sumS+=v.self; cntS++; }
                 if(v.manager !== null) { sumM+=v.manager; cntM++; }
+                if(v.liderado !== null) { sumL+=v.liderado; cntL++; }
+                if(v.cliente !== null) { sumC+=v.cliente; cntC++; }
              });
              const avgSelf = cntS ? (sumS/cntS).toFixed(2) : '-';
              const avgMgr = cntM ? (sumM/cntM).toFixed(2) : '-';
+             const avgLid = cntL ? (sumL/cntL).toFixed(2) : '-';
+             const avgCli = cntC ? (sumC/cntC).toFixed(2) : '-';
 
              htmlRows += `<tr>
                 <td><button class="btn-icon" onclick="toggleDetails('row-${idx}')"><i class="fas fa-eye"></i></button></td>
@@ -992,23 +992,25 @@
                     <div class="detail-flex">
                         ${alertMissing}
                         <div class="detail-table">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:#f8f9fa; padding:10px; border-radius:6px; font-weight:bold; font-size:0.9rem;">
-                                <span>Média Autoavaliação: ${avgSelf}</span>
-                                <span>Média Gestor: ${avgMgr}</span>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:#f8f9fa; padding:10px; border-radius:6px; font-weight:bold; font-size:0.8rem;">
+                                <span>Auto: ${avgSelf}</span>
+                                <span>Gestor: ${avgMgr}</span>
+                                <span>Liderado: ${avgLid}</span>
+                                <span>Cli. Interno: ${avgCli}</span>
                             </div>
-                            <h4>Detalhamento de Notas</h4>
+                            <h4>Detalhamento de Notas (360º)</h4>
                             <table>
-                                <thead><tr><th style="font-size:0.75rem;">Competência</th><th style="font-size:0.75rem;">Autoavaliação</th><th style="font-size:0.75rem;">Gestor</th></tr></thead>
+                                <thead><tr><th style="font-size:0.75rem;">Competência</th><th style="font-size:0.75rem;">Auto</th><th style="font-size:0.75rem;">Gestor</th><th style="font-size:0.75rem;">Liderado</th><th style="font-size:0.75rem;">Cli. Interno</th></tr></thead>
                                 <tbody>
                                     ${Object.entries(p.detailedScores).map(([k,v]) => {
-                                        return `<tr><td>${k}</td><td>${fmt(v.self)}</td><td>${fmt(v.manager)}</td></tr>`;
+                                        return `<tr><td>${k}</td><td>${fmt(v.self)}</td><td>${fmt(v.manager)}</td><td>${fmt(v.liderado)}</td><td>${fmt(v.cliente)}</td></tr>`;
                                     }).join('')}
                                 </tbody>
                             </table>
                         </div>
                         <div class="detail-charts" style="width:100%">
                             <div class="detail-chart-box">
-                                <h5>Comparativo (Auto vs Gestor)</h5>
+                                <h5>Comparativo 360º</h5>
                                 <div class="radar-wrapper"><div class="radar-container"><canvas id="rad-${idx}"></canvas></div></div>
                             </div>
                         </div>
@@ -1023,9 +1025,21 @@
                 const ctx = document.getElementById(`rad-${idx}`);
                 if(ctx) {
                     try {
+                        const labels = Object.keys(p.detailedScores);
+                        const dataSelf = labels.map(x=>p.detailedScores[x].self);
+                        const dataMgr = labels.map(x=>p.detailedScores[x].manager);
+                        const dataLid = labels.map(x=>p.detailedScores[x].liderado);
+                        const dataCli = labels.map(x=>p.detailedScores[x].cliente);
+                        
+                        let datasets = [];
+                        if(p.hasSelf) datasets.push({label:'Auto', data:dataSelf, borderColor:'#F39C12', backgroundColor:'transparent'});
+                        if(p.hasManager) datasets.push({label:'Gestor', data:dataMgr, borderColor:'#00849C', backgroundColor:'rgba(0,132,156,0.1)'});
+                        if(p.hasLiderado) datasets.push({label:'Liderado', data:dataLid, borderColor:'#8E44AD', backgroundColor:'transparent'});
+                        if(p.hasCliente) datasets.push({label:'Cli. Interno', data:dataCli, borderColor:'#27AE60', backgroundColor:'transparent'});
+
                         new Chart(ctx, {
                             type: 'radar',
-                            data: { labels: Object.keys(p.detailedScores), datasets: [{label:'Auto', data:Object.values(p.detailedScores).map(x=>x.self), borderColor:'#F39C12', backgroundColor:'transparent'}, {label:'Gestor', data:Object.values(p.detailedScores).map(x=>x.manager), borderColor:'#00849C', backgroundColor:'rgba(0,132,156,0.1)'}] },
+                            data: { labels: labels, datasets: datasets },
                             options: { layout: { padding: 20 }, scales: {r:{min:0, max: scaleConfig.max}} }
                         });
                     } catch(e){ console.log("Chart render error", e); }
@@ -1037,39 +1051,45 @@
     function downloadParticipantPDF(uid) {
         const p = rawData.find(x => x.uid === uid);
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.setFontSize(18); doc.text(`Dossiê: ${p.nome}`, 14, 20);
-        doc.setFontSize(11); doc.text(`Cargo: ${p.cargo} | Média: ${p.avg.toFixed(2)}`, 14, 30);
-        const bodyData = Object.entries(p.detailedScores).map(([k,v]) => [k, (v.self ? v.self.toFixed(2) : '-'), (v.manager ? v.manager.toFixed(2) : '-')]);
-        doc.autoTable({ startY: 40, head: [['Competência', 'Auto', 'Gestor']], body: bodyData });
-        doc.save(`Dossie_${p.nome}.pdf`);
+        doc.setFontSize(18); doc.text(`Dossiê 360º: ${p.nome}`, 14, 20);
+        doc.setFontSize(11); doc.text(`Cargo: ${p.cargo} | Média Geral: ${p.avg.toFixed(2)}`, 14, 30);
+        const bodyData = Object.entries(p.detailedScores).map(([k,v]) => [
+            k, 
+            (v.self ? v.self.toFixed(2) : '-'), 
+            (v.manager ? v.manager.toFixed(2) : '-'),
+            (v.liderado ? v.liderado.toFixed(2) : '-'),
+            (v.cliente ? v.cliente.toFixed(2) : '-')
+        ]);
+        doc.autoTable({ startY: 40, head: [['Competência', 'Auto', 'Gestor', 'Liderado', 'Cli. Interno']], body: bodyData });
+        doc.save(`Dossie360_${p.nome}.pdf`);
     }
 
     // --- TAB 3 PERFORMANCE ---
     function updatePerformanceFilters() {
         const sub = currentFilteredData; 
-        const conc = {}; sub.forEach(i => { const k=i.superintendencia; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<1.75)conc[k][0]++; else if(i.avg<2.50)conc[k][1]++; else if(i.avg<3.50)conc[k][2]++; else conc[k][3]++; });
+        const conc = {}; sub.forEach(i => { const k=i.dept; if(!conc[k])conc[k]=[0,0,0,0]; if(i.avg<1.75)conc[k][0]++; else if(i.avg<2.50)conc[k][1]++; else if(i.avg<3.50)conc[k][2]++; else conc[k][3]++; });
         const lbls = Object.keys(conc);
         if(charts.concepts) charts.concepts.destroy();
         charts.concepts = new Chart(document.getElementById('chartConcepts'), {
-            type:'bar', data: { labels:lbls, datasets:[{label:'Muito Abaixo', data:lbls.map(k=>conc[k][0]), backgroundColor:'#C0392B'}, {label:'Abaixo', data:lbls.map(k=>conc[k][1]), backgroundColor:'#E74C3C'}, {label:'Atende', data:lbls.map(k=>conc[k][2]), backgroundColor:'#3498DB'}, {label:'Acima', data:lbls.map(k=>conc[k][3]), backgroundColor:'#27AE60'}] }, options: {maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true}}} 
+            type:'bar', data: { labels:lbls, datasets:[{label:'Não atende', data:lbls.map(k=>conc[k][0]), backgroundColor:'#C0392B'}, {label:'Atende parcialmente', data:lbls.map(k=>conc[k][1]), backgroundColor:'#E74C3C'}, {label:'Atende plenamente', data:lbls.map(k=>conc[k][2]), backgroundColor:'#3498DB'}, {label:'Supera', data:lbls.map(k=>conc[k][3]), backgroundColor:'#27AE60'}] }, options: {maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true}}} 
         });
 
         const ranked = [...sub].sort((a,b)=>b.avg-a.avg);
         if(charts.rank) charts.rank.destroy();
         charts.rank = new Chart(document.getElementById('chartRanking'), {
-            type:'bar', data:{labels:ranked.map(r=>r.nome), datasets:[{label:'Nota', data:ranked.map(r=>r.avg.toFixed(2)), backgroundColor:'#00849C'}]}, options:{maintainAspectRatio:false, indexAxis:'y', scales:{x:{max:scaleConfig.max}}}
+            type:'bar', data:{labels:ranked.map(r=>r.nome), datasets:[{label:'Média Geral', data:ranked.map(r=>r.avg.toFixed(2)), backgroundColor:'#00849C'}]}, options:{maintainAspectRatio:false, indexAxis:'y', scales:{x:{max:scaleConfig.max}}}
         });
 
         let q1=0,q2=0,q3=0,q4=0;
         sub.forEach(x => { if(x.avg<1.75)q1++; else if(x.avg<2.50)q2++; else if(x.avg<3.50)q3++; else q4++; });
-        createChart('chartQuartis', 'bar', ['Muito Abaixo','Abaixo','Atende','Acima'], [q1,q2,q3,q4], ['#8B0000','#DC3545','#FFC107','#27AE60']);
+        createChart('chartQuartis', 'bar', ['Não atende','Atende parcialmente','Atende plenamente','Supera'], [q1,q2,q3,q4], ['#8B0000','#DC3545','#FFC107','#27AE60']);
 
         let compSums = {};
         sub.forEach(p => {
              for(let c in p.detailedScores) {
-                 if(p.detailedScores[c].manager !== null) {
+                 if(p.detailedScores[c].final !== null && p.detailedScores[c].final > 0) {
                      if(!compSums[c]) compSums[c] = {s:0, n:0};
-                     compSums[c].s += p.detailedScores[c].manager;
+                     compSums[c].s += p.detailedScores[c].final;
                      compSums[c].n++;
                  }
              }
@@ -1099,9 +1119,9 @@
         let compSums = {};
         subset.forEach(p => {
              for(let c in p.detailedScores) {
-                 if(p.detailedScores[c].manager !== null) {
+                 if(p.detailedScores[c].final !== null && p.detailedScores[c].final > 0) {
                      if(!compSums[c]) compSums[c] = {s:0, n:0};
-                     compSums[c].s += p.detailedScores[c].manager;
+                     compSums[c].s += p.detailedScores[c].final;
                      compSums[c].n++;
                  }
              }
@@ -1130,6 +1150,7 @@
     function toggleDetails(id) { const el=document.getElementById(id); el.style.display=el.style.display==='table-row'?'none':'table-row'; }
     function clearGlobalFilters() { document.getElementById('globalSuper').value = 'all'; applyGlobalFilters('super'); }
     function clearPartFilters() { document.getElementById('fCargo').value = 'all'; applyPartFilters(); }
+    
     function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
@@ -1139,7 +1160,7 @@
             if(btn) btn.classList.add('active');
         }
         if(id==='performance') setTimeout(updatePerformanceFilters, 50);
-        else if(id==='participantes') applyPartFilters();
+        else if(id==='participantes') applyPartFilters(false, false);
         else if(id==='gestao') updateGestaoFilters();
         else if(id==='geral') updateVisaoGeral();
     }
